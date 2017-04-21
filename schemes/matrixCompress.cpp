@@ -6,8 +6,6 @@
 #include "matrixCompress.h"
 
 
-
-
 unsigned compressMatrix32_row(uint32_t* matrix, unsigned M,  unsigned N, uint8_t* compressedMatrix, unsigned* pointers ){
 
     unsigned numBytes = 0;
@@ -40,6 +38,7 @@ unsigned compressMatrix32_row(uint32_t* matrix, unsigned M,  unsigned N, uint8_t
             printf("row is byte compressable\n");
             //writing the encoding byte
             tempByte = COMP8;
+			//TODO maybe memcpy is not that efficient
             memcpy(&compressedMatrix[numBytes], &tempByte, 1);
             numBytes++;
 
