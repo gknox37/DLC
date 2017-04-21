@@ -13,9 +13,11 @@ commands:
   build:
     - echo "Building project"
     # Use CMake to generate the build files. Remember that your directory gets uploaded to /src
-    - cmake /src
+    #- cmake /src
     # Run the make file to compile the project.
-    - make
+    #- make
+    - gcc /src/schemes/longCompress.c -o longCompress
+    - ./longCompress
     # here we break the long command into multiple lines. The Yaml
     # format supports this using a block-strip command. See
     # http://stackoverflow.com/a/21699210/3543720 for info- >-
