@@ -13,6 +13,14 @@
 #include "utils.hpp"
 
 #define blockSize 64  // Power of 2 ?
+#define BLOCK_SIZE 1024 //Thread Block size
+
+
+__global__ void decompress_kernel(devX, devY, ){
+    int i = threadIdx.x + blockDim.x*blockIdx.x;
+    
+
+}
 
 
 void initArray(int size , uint8_t **ptrArray1 , uint16_t ** ptrArray2 , bool *isCompressed)
@@ -137,9 +145,9 @@ int main(int argc, char **argv) {
         for (  j =0 ; j < numPtrs ; j++)
         printf("Deltas : %d , ", (int)((ptrArray1[i])[j])) ;
     }
-    int bytesAfterCompression = numBlocks * ( numPtrs + sizeof(uint8_t*)  + sizeof(bool) + sizeof(long)) ;
-    int bytesBeforeCompression =  longArraySize * sizeof(long) ;
-    double ratio = ((double)bytesAfterCompression)/((double)bytesBeforeCompression) ;
+    int bytesAfterCompress = numBlocks * ( numPtrs + sizeof(uint8_t*)  + sizeof(bool) + sizeof(long)) ;
+    int bytesBeforeCompress =  longArraySize * sizeof(long) ;
+    double ratio = ((double)bytesAfterCompress)/((double)bytesBeforeCompress) ;
     printf("Ratio : %f\n" , ratio);
     
     printf("\n");
@@ -148,6 +156,33 @@ int main(int argc, char **argv) {
     const auto end = now();
     // get elapsed time in milliseconds
     const auto elapsed = std::chrono::duration<double, std::milli>(end - start).count();
-    std::cout << "Compression time elapsed = " << elapsed << " milliseconds.";
+    std::cout << "Compression time = " << elapsed << " milliseconds.";
+    
+    // Transfer compacted to GPU
+    // ----------------------------------------
+    check_success(cudaMalloc(&devX, bytesAfterCompress));
+    check_success(cudaMalloc(&devY, bytesBeforeCompress));
+    check_success(cudaMemcpy(devX,  , bytesAfterCompress, cudaMemcpyHostToDevice));
+    const auto transferCPU_GPU = now();
+    // get elapsed time in milliseconds
+    elapsed = std::chrono::duration<double, std::milli>(transferCPU_GPU - end).count();
+    std::cout << "Transfer CPU to GPU time = " << elapsed << " milliseconds.";
+    
+    // Decompress in GPU
+    // ----------------------------------------
+    int x = ceil(bytesAfterCompress/1024.0);
+    dim3 DimGrid(x, 1, 1);
+    dim3 DimBlock(BLOCK_SIZE, 1, 1);
+    decompress_kernel<<<DimGrid, DimBlock>>>(devX, devY, );
+    cudaDeviceSynchronize();
+    const auto Decompress_GPU = now();
+    // get elapsed time in milliseconds
+    elapsed = std::chrono::duration<double, std::milli>(Decompress_GPU - transferCPU_GPU).count();
+    std::cout << "De-Compression in GPU time = " << elapsed << " milliseconds.";
+    
+    // Free Device Memory
+    // ----------------------------------------
+    check_success(cudaFree(devX));
+    check_success(cudaFree(devY));
     return 0;
 }
