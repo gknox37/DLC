@@ -16,7 +16,7 @@
 #define BLOCK_SIZE 1024 //Thread Block size
 
 
-__global__ void decompress_kernel(devX, devY, ){
+__global__ void decompress_kernel(int devX, int devY ){
     int i = threadIdx.x + blockDim.x*blockIdx.x;
     
 
@@ -357,7 +357,9 @@ int main(int argc, char **argv) {
     
     int bytesCopied = bdCompress((char*)testArray , longArraySize * sizeof(long) ,compressed ,  isCompressed , baseVals) ;
     printf("Length , Bytes copied  : %d , %d\n" , longArraySize*sizeof(long) , bytesCopied) ;
-    float compression_ratio = (float)(numBlocks*(sizeof(long) + sizeof(int16_t)) + bytesCopied)/(longArraySize * sizeof(long)) ;
+    int bytesAfterCompress = numBlocks*(sizeof(long) + sizeof(int16_t)) + bytesCopied;
+    int bytesBeforeCompress =longArraySize * sizeof(long);
+    float compression_ratio = ((float) bytesAfterCompress)/ ((float) bytesBeforeCompress);
     for ( i = 0 ; i < numBlocks ; i++)
     {
         printf("Base value , compressed info , Ratio : %lu , %d\n , %f\n", baseVals[i] , isCompressed[i] , compression_ratio) ;
@@ -383,9 +385,12 @@ int main(int argc, char **argv) {
     
     // Transfer compacted to GPU
     // ----------------------------------------
+    int *devX;
+    int *devY;
+    
     check_success(cudaMalloc(&devX, bytesAfterCompress));
     check_success(cudaMalloc(&devY, bytesBeforeCompress));
-    check_success(cudaMemcpy(devX,  , bytesAfterCompress, cudaMemcpyHostToDevice));
+    check_success(cudaMemcpy(devX,   , bytesAfterCompress, cudaMemcpyHostToDevice));
     const auto transferCPU_GPU = now();
     // get elapsed time in milliseconds
     elapsed = std::chrono::duration<double, std::milli>(transferCPU_GPU - end).count();
@@ -396,7 +401,7 @@ int main(int argc, char **argv) {
     int x = ceil(bytesAfterCompress/1024.0);
     dim3 DimGrid(x, 1, 1);
     dim3 DimBlock(BLOCK_SIZE, 1, 1);
-    decompress_kernel<<<DimGrid, DimBlock>>>(devX, devY, );
+    decompress_kernel<<<DimGrid, DimBlock>>>(devX, devY );
     cudaDeviceSynchronize();
     const auto Decompress_GPU = now();
     // get elapsed time in milliseconds
