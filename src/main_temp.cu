@@ -210,7 +210,7 @@ int chunkGranularity = (localVal <=0) ? 1 : localChunkSize ;
                     }
                     memcpy (&decompressed[i1 + chunkGranularity * t_idx] , &a , chunkGranularity) ;
                   }
-                   if (chunkGranularity == 4)
+                   if (chunkGranularity == 8)
                   {
                     long a = blockBaseVal ;
                      
@@ -552,7 +552,7 @@ int main(int argc, char **argv) {
   long testArray[longArraySize] ;
   int i ,j ;
   for ( i =0 ; i < longArraySize ; i++)
-     testArray[i] = (100*i) %16   ; 
+     testArray[i] = (100*i)    ; 
   int numBlocks = (((longArraySize * sizeof(long))-1)/blockSize) + 1 ; //ceiling 
 
   long baseVals[numBlocks] ;
