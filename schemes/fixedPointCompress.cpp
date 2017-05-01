@@ -11,6 +11,7 @@ uint32_t compressFixed32(uint32_t* in, uint32_t len, uint8_t precision, uint8_t 
 	uint32_t numBytes = 0;
 	uint32_t pointersIdx = 0;
 	std::cout.precision(precision);
+    
 
 	//compressing batchSize by batchSize
 	for(uint32_t inIdx = 0; inIdx < len; inIdx += batchSize){

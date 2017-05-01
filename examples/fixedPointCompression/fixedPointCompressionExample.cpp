@@ -11,8 +11,17 @@
 #define PRECISION 1
 
 int main(){
+    fixed_point<int, 20> fp1(1.1);           // Will be signed 24:8 (if int is 32-bits)
+    //fixed_point<unsigned int, 16> fp1; // Will be unsigned 16:16 (if int is 32-bits)
+    
+    
+    printf("Val is %f\n", fp1);
+    //std::cout.precision(PRECISION);
+    //std::cout << "Val here:" << std::fixed << fp1 << "\n";
+    return 1;
+    
 	float x = (float) 0b00010000;
-	std::cout.precision(PRECISION);
+	
     //creating example input
     float* matrix =(float*) malloc(M_SIZE*sizeof(float));
     //uint32_t* decompressedMatrix =(uint32_t*) malloc(M_SIZE *sizeof(uint32_t));
