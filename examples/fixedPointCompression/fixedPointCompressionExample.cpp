@@ -3,43 +3,34 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <iostream>
+#include <time.h>
 #include  "../../schemes/fixedPointCompress.h"
 
-#define M_SIZE 5000
-#define RAND_RANGE 300 
-#define RAND_MIN 0
-#define PRECISION 1
+#define M_SIZE 10
+#define RANDO_MIN  -10
+#define RANDO_MAX  10
+
+#define BATCH_SIZE 10
 
 int main(){
-    fixed_point<int, 20> fp1(1.1);           // Will be signed 24:8 (if int is 32-bits)
-    //fixed_point<unsigned int, 16> fp1; // Will be unsigned 16:16 (if int is 32-bits)
+    srand( time(NULL) );
     
-    
-    printf("Val is %f\n", fp1);
-    //std::cout.precision(PRECISION);
-    //std::cout << "Val here:" << std::fixed << fp1 << "\n";
-    return 1;
-    
-	float x = (float) 0b00010000;
-	
     //creating example input
-    float* matrix =(float*) malloc(M_SIZE*sizeof(float));
-    //uint32_t* decompressedMatrix =(uint32_t*) malloc(M_SIZE *sizeof(uint32_t));
-    //uint8_t* compressedMatrix = (uint8_t*) malloc( M_SIZE *(sizeof(uint32_t) + 4 ));
-    //unsigned* pointers = (unsigned*) malloc((M_SIZE) * sizeof(unsigned));
+    fixed_point24_8* in = (fixed_point24_8*) malloc(sizeof(fixed_point24_8)*M_SIZE);
+    fixed_point24_8* in_decom = (fixed_point24_8*) malloc(sizeof(fixed_point24_8)*M_SIZE);
+    uint8_t* compressed_in = (uint8_t*) malloc(sizeof(fixed_point24_8)*M_SIZE*2 );//2 for safety
+    unsigned* pointers = (unsigned*) malloc((M_SIZE) * sizeof(unsigned));
     
-    for (int row = 0; row < M_SIZE; row++){
-		float temp = rand() % RAND_RANGE + RAND_MIN;
-    	matrix[row] = temp;
-		std::cout << "Val: "<< std::fixed << (float)x << "\n";
-            //printf("Val :%d\n", matrix[row*M_SIZE +col]);
+    for (int idx  = 0; idx < M_SIZE; idx++){
+        float currRand =  RANDO_MIN + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(RANDO_MAX-RANDO_MIN)));
+        in[idx].insert(currRand); 
+        printf("Val :%f\n", currRand);
     }
-	return 0;
 
-	/*
 	clock_t begin = clock();
-    unsigned numBytes = compressMatrix32_row(matrix, M_SIZE, N_SIZE, compressedMatrix, pointers );
-    int retVal = decompressMatrix32_row(compressedMatrix, pointers, M_SIZE, N_SIZE, decompressedMatrix);
+    int numBytes = compressFixed24_8(in,M_SIZE,0,BATCH_SIZE,compressed_in,pointers);
+    printf("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n");
+    int retVal = decompressFixed24_8(compressed_in, pointers, M_SIZE, in_decom, BATCH_SIZE);
 	clock_t end = clock();
 
     if(retVal == -1){
@@ -47,6 +38,18 @@ int main(){
         return -1;
     }
 
+    //comparing matricies
+    for(int i = 0; i < M_SIZE; i++){
+        int sub = in[i].data - in_decom[i].data; 
+        printf("i=%d| %d - %d = %d\n", i, in[i].data, in_decom[i].data, sub);
+        if(sub != 0){
+            printf("ERROROROROROR\n");
+            return -1;
+        }
+    }
+    printf("Matricies match!!!\n");
+    return 0;
+    /*
 
     //comparing matrices
     for (unsigned row = 0; row< M_SIZE; row++){
@@ -71,7 +74,7 @@ int main(){
     printf("Number of bytes in original matrix = %d\n", M_SIZE*N_SIZE * 4);
     printf("Compression ratio = %f\n", ratio);
 	*/
-    free(matrix);
+    free(in);
     //free(compressedMatrix);
 	//free(decompressedMatrix);
     //free(pointers);
