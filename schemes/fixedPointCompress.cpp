@@ -10,7 +10,8 @@
 uint32_t compressFixed24_8(fixed_point24_8* in, uint32_t len, uint8_t loss, uint32_t batchSize, uint8_t* out, unsigned* pointers){	
 	uint32_t numBytes = 0;
 	uint32_t pointersIdx = 0;
-    char currByte;
+    uint8_t currByte;
+    uint16_t currShort;
     char compressable = 1;
     int curr,diff; 
     int currBase;
@@ -18,6 +19,7 @@ uint32_t compressFixed24_8(fixed_point24_8* in, uint32_t len, uint8_t loss, uint
 	//compressing elemenets of in into batches of size batchsize
 	for(uint32_t inIdx = 0; inIdx < len; inIdx += batchSize){
         pointers[pointersIdx] = numBytes;
+        pointersIdx++;
 
         //assuming best case compression
         compressable = 1; 
@@ -59,18 +61,36 @@ uint32_t compressFixed24_8(fixed_point24_8* in, uint32_t len, uint8_t loss, uint
             currBytePointer += (compressable-1); //little endian
 
             //writing the bytes
-            memcpy(&out[numBytes],currBytePointer,compressable);
-            numBytes += compressable;
+            if (compressable == 1){
+                currByte = (uint8_t)diff;
+                memcpy(&out[numBytes],&currByte,compressable);
+                numBytes += compressable;
 
-            //writing the fractional component
-            currByte = curr & ~mask24_8;
-            memcpy(&out[numBytes], &currByte, 1);
-            numBytes++;
+                //writing the fractional component
+                currByte = curr & ~mask24_8;
+                memcpy(&out[numBytes], &currByte, 1);
+                numBytes++;
+            }
+            else if (compressable =2){
+                currShort = (uint16_t)diff;
+                memcpy(&out[numBytes],&currShort,compressable);
+                numBytes += compressable;
+
+                //writing the fractional component
+                currByte = curr & ~mask24_8;
+                memcpy(&out[numBytes], &currByte, 1);
+                numBytes++;
+            }
+            else if (compressable =3){
+                //writing as is
+                memcpy(&out[numBytes],&curr,4);
+            }
+
 
             printf("-----------------------\n");
             printf("Delta Pre compress is %d\n",diff);
             printf("Frac Pre compress is %x\n",currByte);
-            //printf("Value written  = %x\n", *currBytePointer);
+            printf("Value written  = %x\n", *currBytePointer);
             printf("Data Pre compress is = %x\n",curr);
         }
     }
@@ -82,8 +102,8 @@ uint32_t decompressFixed24_8(uint8_t* in, unsigned* pointers, unsigned len, fixe
     int8_t currByte, currFrac;
     int16_t currShort;
     int currData;
-    int numBatches = ceil(len/batchSize);
-
+    int numBatches = ceil((float)len/(float)batchSize);
+    printf("Number of batches is %d\n", numBatches);
     for (int currBatch = 0; currBatch < numBatches; currBatch++){
         //finding encoding
         baseIdx = pointers[currBatch];
@@ -106,20 +126,24 @@ uint32_t decompressFixed24_8(uint8_t* in, unsigned* pointers, unsigned len, fixe
             else if(compressable == 2){
                 memcpy(&currShort,&in[baseIdx],2);
                 baseIdx += 2;
-                memcpy(&currFrac,&in[baseIdx],2);
-                baseIdx += 2;
+                memcpy(&currFrac,&in[baseIdx],1);
+                baseIdx += 1;
                 out[currElem].data = (((int)currShort +base) << 8) | (~mask24_8 & (int)currFrac); 
+                printf("-----------------------\n");
+                printf("Delta after compression = %d\n",currShort);
+                printf("Frac after compression = %x\n",currFrac);
+                printf("Data after compression = %x\n",out[currElem].data);
             }
             else if(compressable == 3){
                 memcpy(&out[currElem].data,&in[baseIdx],4);
                 baseIdx += 4;
             }
             else{
-                printf("Unrecongized Compression\n");
+                printf("Unrecongized Compression of %d\n", compressable);
                 return -1;
             }
         }
     }
-    printf("Compression Complete\n");
+    printf("Decompression Complete\n");
     return 0; 
 }

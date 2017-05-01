@@ -7,8 +7,8 @@
 #include  "../../schemes/fixedPointCompress.h"
 
 #define M_SIZE 10
-#define RANDO_MIN  -10
-#define RANDO_MAX  10
+#define RANDO_MIN  -500
+#define RANDO_MAX  500
 
 #define BATCH_SIZE 10
 
