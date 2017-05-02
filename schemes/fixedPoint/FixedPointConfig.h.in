@@ -1,0 +1,4 @@
+// the configured options and settings for Tutorial
+#define FixedPoint_VERSION_MAJOR @FixedPoint_VERSION_MAJOR@
+#define FixedPoint_VERSION_MINOR @FixedPoint_VERSION_MINOR@
+

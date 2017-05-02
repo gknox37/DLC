@@ -3,8 +3,8 @@
 CC=g++
 CFLAGS =-g -Wall
 MYPROGRAM=fixedPointCompressionExample
-MYINCLUDES=-I ../../schemes/fixedPoint/
-SOURCE = fixedPointCompressionExample.cpp  
+MYINCLUDES=-I .
+SOURCE = fixPointCompressionExample.cpp  
 REQ = fixedPointCompress.h
 MYLIBRARIES=lftk  
 
@@ -21,8 +21,8 @@ fixedPointCompressionExample: fixedPointCompressionExample.o fixedPointCompress.
 fixedPointCompressionExample.o: fixedPointCompressionExample.cpp
 	$(CC) $(CFLAGS) $(MYINCLUDES) -c fixedPointCompressionExample.cpp
 
-fixedPointCompress.o: ../../schemes/fixedPoint/fixedPointCompress.cpp  ../../schemes/fixedPoint/fixedPointCompress.h
-	$(CC) $(CFLAGS) $(MYINCLUDES) -c ../../schemes/fixedPoint/fixedPointCompress.cpp
+fixedPointCompress.o: fixedPointCompress.cpp fixedPointCompress.h
+	$(CC) $(CFLAGS) $(MYINCLUDES) -c fixedPointCompress.cpp
 	
 clean:
 	$(RM) *.o fixedPointCompressionExample
