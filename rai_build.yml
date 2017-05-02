@@ -17,7 +17,7 @@ commands:
     #- cmake /src
     # Run the make file to compile the project.
     - make -C /src
-    - ./ece508-final
+    - ./ece508-final /src/data/input512.raw
     #- g++ /src/schemes/longCompress.c -o longCompress
     #- ./longCompress
 
@@ -26,10 +26,10 @@ commands:
     # http://stackoverflow.com/a/21699210/3543720 for info- >-
     - >-
       nvprof --cpu-profiling on --export-profile timeline.nvprof --
-      ./ece508-final /src/data/test10.hdf5 /src/data/model.hdf5 10
+      ./ece508-final /src/data/input512.raw
     - >-
       nvprof --cpu-profiling on --export-profile analysis.nvprof --analysis-metrics --
-      ./ece508-final /src/data/test10.hdf5 /src/data/model.hdf5 10- >-
+      ./ece508-final /src/data/input512.raw
 
-    - >-
-      ./ece508-final -i input1,input2 -o output
+    #- >-
+    #  ./ece508-final -i input1,input2 -o output
