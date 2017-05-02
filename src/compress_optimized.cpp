@@ -11,13 +11,14 @@ using namespace std;
 
 #define blockSize 128 //This is number of bytes per compression block
 
+//Casts t as int16, int32 or long, then deferences t.
 long getVals(char * t , int base_size)
 {
     long a ;
     if(base_size == 16)
-        a = *((int16_t *)t) ;
+        a = *((int16_t *) t) ; //deference after casting t as int16 pointer
     else if(base_size == 32)
-        a = *((int32_t*)t) ;
+        a = *((int32_t *) t) ; //deference after casting t as int32 pointer
     else
         a = *((long*)t) ;
     return a ;
@@ -38,7 +39,7 @@ int bdCompress(char* input, int len, char * compressed,  int16_t * isCompressed,
     
     int bytesCopied = 0 ;
     int blkCounter = 0 ;
-    int numBlocks = ((len - 1/blockSize)) + 1 ; // ceiling
+    int numBlocks = ceil(len/blockSize); //int numBlocks = ((len - 1/blockSize)) + 1 ; // ceiling
     int i ;
     int size_index ;
     int size_array[3] ;
@@ -73,26 +74,28 @@ int bdCompress(char* input, int len, char * compressed,  int16_t * isCompressed,
         for ( size_index = 0 ; size_index < 3 ; size_index++)
         {
             int base_size = size_array[size_index] ;
-            int numPtrs =  (blockSize*8)/(size_array[size_index]) ;
+            int numPtrs =  (blockSize*8)/(size_array[size_index]) ; //this is number of elements in block that will be compressed
             long ptrArray [numPtrs] ;
             char local_storage[blockSize] ;
             
             for ( i = 0 ; i < numPtrs ; i++)
             {
-                ptrArray[i] = getVals((char*)&input[offset + i*(base_size/8)] , base_size) ;
+                ptrArray[i] = getVals((char*)&input[offset + i*(base_size/8)] , base_size) ; //get input as int16, int32 or long
             }
             bool flag = false ;
             long minValue ;
             for ( i =0 ; i<numPtrs ; i++)
             {
+                //We are trying to find minvalue in Block
+                //minValue will equal ptrArray[0] at start, then it will become minimum of ptr[i] values
                 if(flag==false)
                 {
                     flag = true ;
-                    minValue =  ptrArray[i];
+                    minValue = ptrArray[i];
                 }
                 else
                 {
-                    if( ptrArray[i]< minValue)
+                    if( ptrArray[i] < minValue)
                         minValue = ptrArray[i] ;
                 }
             }
@@ -101,6 +104,7 @@ int bdCompress(char* input, int len, char * compressed,  int16_t * isCompressed,
             flag = false ;
             for (i =0 ; i<numPtrs ; i++)
             {
+                //After loop, range will equal largest (ptrArray[i] - minValue)
                 if(flag ==false)
                 {
                     range = (ptrArray[i])  - minValue ;
@@ -131,10 +135,9 @@ int bdCompress(char* input, int len, char * compressed,  int16_t * isCompressed,
                     minVal = minValue ;
                     printf("8: Range : %ld , minValue : %ld , min_div:%d , numPtrs:%d\n" , range , minValue,base_size,numPtrs) ;
                 }
-                
-                
             }
             else if ((range < pow(2,sizeof(uint16_t)*8)) && (base_size > 16))
+                // compress into uint16
             {
                 if(minBytesUsed == -1 ){
                     minBytesUsed = 16 *numPtrs ;
@@ -150,13 +153,9 @@ int bdCompress(char* input, int len, char * compressed,  int16_t * isCompressed,
                     minVal = minValue ;
                     printf("16 : Range : %ld, minValue : %ld , min_div:%d , numPtrs:%d\n" , range , minValue,base_size,numPtrs) ;
                 }
-                
-                
-                
-                
             }
-            
             else if ( (range < pow ( 2 , sizeof(uint32_t)*8)) && (base_size > 32))
+                // compress into uint32
             {
                 if(minBytesUsed == -1 ){
                     minBytesUsed = 32 *numPtrs ;
@@ -172,9 +171,6 @@ int bdCompress(char* input, int len, char * compressed,  int16_t * isCompressed,
                     minVal = minValue ;
                     printf("32: Range : %ld, minValue : %ld, min_div:%d , numPtrs:%d\n" , range , minValue,base_size,numPtrs) ;
                 }
-                
-                
-                
             }
             printf("Bytes used so far :%d\n" , minBytesUsed) ;
         }
@@ -189,47 +185,50 @@ int bdCompress(char* input, int len, char * compressed,  int16_t * isCompressed,
                 
                 ptrArray[i] = getVals(&input[offset + (i*minDivision/8)] , minDivision)  ;
                 div_off = 3 ;
-                if ( minDivision == 16)
+                if ( minDivision == 16)         //Was unit16 BEFORE compression
                 {
                     //   ptrArray[i] = (int16_t *)(&input[offset + i*minDivision]) ;
                     div_off = 1 ;
                 }
-                else  if (minDivision == 32)
+                else  if (minDivision == 32)    //Was uint32 BEFORE compression
                 {
                     //  ptrArray[i] = (int32_t*) (&input[offset + i*minDivision]) ;
                     div_off = 2 ;
                 }
                 
-                if ( minCompressed == 32)
+                if ( minCompressed == 32)       //is uint32 AFTER compression
                 {
                     uint32_t a  = ptrArray[i] - minVal ;
                     memcpy(&compressed[bytesCopied] , &a , sizeof(uint32_t)) ;
                     compressed_off = 3 ;
                 }
-                else if ( minCompressed == 16)
+                else if ( minCompressed == 16)  //is uint16 AFTER compression
                 {
                     uint16_t a  = ptrArray[i] - minVal ;
                     memcpy(&compressed[bytesCopied] , &a , sizeof(uint16_t)) ;
                     compressed_off = 2 ;
-                    
-                    
                 }
-                else if ( minCompressed == 8)
+                else if ( minCompressed == 8)   //is uint8 AFTER compression
                 {
-                    
-                    uint8_t a  = (ptrArray[i]) - minVal ;
+                    uint8_t a  = ptrArray[i] - minVal ;
                     memcpy(&compressed[bytesCopied] , &a , sizeof(uint8_t)) ;
                     compressed_off = 1 ;
-                    
                 }
                 bytesCopied += (minCompressed/8) ;
                 
-                
             }
+            //isCompressed is 5 if uint16 was compressed into uint8
+            //                6 if uint16 was compressed into uint16
+            //                7 if uint16 was compressed into uint32
+            //                9 if uint32 was compressed into uint8
+            //               10 if uint32 was compressed into uint16
+            //               11 if uint32 was compressed into uint32
+            //               13 if long was compressed into uint8
+            //               14 if long was compressed into uint16
+            //               15 if long was compressed into uint32
             isCompressed[blkCounter] = 4*div_off + compressed_off ;
             baseVals[blkCounter] = minVal ;
         }
-        
         else
         {
             baseVals[blkCounter] = minVal ;
@@ -237,10 +236,8 @@ int bdCompress(char* input, int len, char * compressed,  int16_t * isCompressed,
             memcpy(&compressed[bytesCopied] , &input[offset] , blockSize) ;
             bytesCopied += blockSize ;
         }
-        
-        
         offset += blockSize ;
-        blkCounter ++ ;
+        blkCounter++ ;
         if ( offset + blockSize > len)
         {
             baseVals[blkCounter] = 0 ;
