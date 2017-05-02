@@ -7,8 +7,9 @@
 #include <stdlib.h>
 #include <time.h>
 #include <fstream>
-#define blockSize 128 // Power of 2 ?
 using namespace std;
+
+#define blockSize 128 //This is number of bytes per compression block
 
 long getVals(char * t , int base_size)
 {
@@ -32,7 +33,7 @@ void initArray(int size , int16_t *isCompressed)
     }
 }
 
-int bdCompress(char* c , int len , char * compressed ,  int16_t * isCompressed , long * baseVals)
+int bdCompress(char* input, int len, char * compressed,  int16_t * isCompressed, long * baseVals)
 {
     
     int bytesCopied = 0 ;
@@ -49,7 +50,7 @@ int bdCompress(char* c , int len , char * compressed ,  int16_t * isCompressed ,
     {
         baseVals[blkCounter] = 0 ;
         isCompressed[blkCounter] = offset - len ;
-        memcpy(&compressed[bytesCopied] , &c[offset] , len - offset) ;
+        memcpy(&compressed[bytesCopied] , &input[offset] , len - offset) ;
         bytesCopied += len - offset ;
         return bytesCopied ;
     }
@@ -78,7 +79,7 @@ int bdCompress(char* c , int len , char * compressed ,  int16_t * isCompressed ,
             
             for ( i = 0 ; i < numPtrs ; i++)
             {
-                ptrArray[i] = getVals((char*)&c[offset + i*(base_size/8)] , base_size) ;
+                ptrArray[i] = getVals((char*)&input[offset + i*(base_size/8)] , base_size) ;
             }
             bool flag = false ;
             long minValue ;
@@ -186,16 +187,16 @@ int bdCompress(char* c , int len , char * compressed ,  int16_t * isCompressed ,
             for (i =0 ; i < numPtrs ; i++)
             {
                 
-                ptrArray[i] = getVals(&c[offset + (i*minDivision/8)] , minDivision)  ;
+                ptrArray[i] = getVals(&input[offset + (i*minDivision/8)] , minDivision)  ;
                 div_off = 3 ;
                 if ( minDivision == 16)
                 {
-                    //   ptrArray[i] = (int16_t *)(&c[offset + i*minDivision]) ;
+                    //   ptrArray[i] = (int16_t *)(&input[offset + i*minDivision]) ;
                     div_off = 1 ;
                 }
                 else  if (minDivision == 32)
                 {
-                    //  ptrArray[i] = (int32_t*) (&c[offset + i*minDivision]) ;
+                    //  ptrArray[i] = (int32_t*) (&input[offset + i*minDivision]) ;
                     div_off = 2 ;
                 }
                 
@@ -233,7 +234,7 @@ int bdCompress(char* c , int len , char * compressed ,  int16_t * isCompressed ,
         {
             baseVals[blkCounter] = minVal ;
             isCompressed[blkCounter] = 0 ;
-            memcpy(&compressed[bytesCopied] , &c[offset] , blockSize) ;
+            memcpy(&compressed[bytesCopied] , &input[offset] , blockSize) ;
             bytesCopied += blockSize ;
         }
         
@@ -244,7 +245,7 @@ int bdCompress(char* c , int len , char * compressed ,  int16_t * isCompressed ,
         {
             baseVals[blkCounter] = 0 ;
             isCompressed[blkCounter] = offset - len ;
-            memcpy(&compressed[bytesCopied] , &c[offset] , len - offset) ;
+            memcpy(&compressed[bytesCopied] , &input[offset] , len - offset) ;
             bytesCopied += len - offset ;
             break ;
         }
@@ -353,13 +354,13 @@ int main(int argc , char *argv[])
         file_in >> longArraySize;
     }
     printf("total lines = %d\n", longArraySize);
-    long testArray[longArraySize];
+    long inputArray[longArraySize];
     if (file_in.is_open()) {
         for( int i =0; i < longArraySize; i++) {
         //while ( std::getline (file_in,line) ){
-            //testArray[i] = stol(line);
-            file_in >> testArray[i];
-            printf("val=%lu, %d\n", testArray[i], i);
+            //inputArray[i] = stol(line);
+            file_in >> inputArray[i];
+            printf("val=%lu, %d\n", inputArray[i], i);
         }
         file_in.close();
     }
@@ -373,22 +374,23 @@ int main(int argc , char *argv[])
     ofstream file_out;
     file_out.open(filename);
     for ( i =0 ; i < longArraySize ; i++){
-        testArray[i] = (100*i);
-        printf("%lu\n",testArray[i]);
-        file_out << testArray[i];
+        inputArray[i] = (100*i);
+        printf("%lu\n",inputArray[i]);
+        file_out << inputArray[i];
         file_out <<"\n";
     }
     file_out.close(); */
     //-----------------Input LOADED -------------
     
-    int numBlocks = (((longArraySize * sizeof(long))-1)/blockSize) + 1 ; //ceiling
+    int numBytesBeforeCompress = longArraySize*sizeof(long);
+    int numBlocks = ceil(numBytesBeforeCompress/blockSize); //int numBlocks = (((longArraySize * sizeof(long))-1)/blockSize) + 1 ; //ceiling
     
     long baseVals[numBlocks] ;
     int16_t  isCompressed[numBlocks] ;
-    char * compressed = (char*) malloc(100000) ;
+    char * compressed = (char*) malloc(numBytesBeforeCompress) ; //Compressed table should be big enough as uncompressed data
     initArray(numBlocks , isCompressed) ;
-    int bytesCopied = bdCompress((char*)testArray , longArraySize * sizeof(long) ,compressed ,  isCompressed , baseVals) ;
-    printf("Length , Bytes copied  : %d , %d\n" , longArraySize*sizeof(long) , bytesCopied) ;
+    int bytesCopied = bdCompress((char*)inputArray, numBytesBeforeCompress, compressed,  isCompressed , baseVals) ;
+    printf("Length , Bytes copied  : %d , %d\n" , numBytesBeforeCompress, bytesCopied) ;
     float compression_ratio = (float)(numBlocks*(sizeof(long) + sizeof(int16_t)) + bytesCopied)/(longArraySize * sizeof(long)) ;
     for ( i = 0 ; i < numBlocks ; i++)
     {
@@ -397,7 +399,7 @@ int main(int argc , char *argv[])
     char * decompressed = (char*) malloc(100000) ;
     int bytes = decompress(compressed , decompressed , bytesCopied , baseVals , isCompressed , numBlocks) ;
     printf("Bytes after decompression : %d\n" , bytes) ;
-    bool t = (bytes == longArraySize * sizeof(long)) && (strncmp((char*)testArray , decompressed , bytes) ==0) ;
+    bool t = (bytes == longArraySize * sizeof(long)) && (strncmp((char*)inputArray , decompressed , bytes) ==0) ;
     if(t)
         printf("Successful \n") ;
     
