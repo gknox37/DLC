@@ -44,7 +44,7 @@ uint32_t compressFixed24_8(fixed_point24_8* in, uint32_t len, uint8_t loss, uint
             }
         }
 
-        printf("Batch is %d byte compressable\n",compressable);
+        //printf("Batch is %d byte compressable\n",compressable);
 
         //writing batch info bit 
         memcpy(&out[numBytes], &compressable, 1);
@@ -86,12 +86,12 @@ uint32_t compressFixed24_8(fixed_point24_8* in, uint32_t len, uint8_t loss, uint
                 memcpy(&out[numBytes],&curr,4);
             }
 
-
-            printf("-----------------------\n");
-            printf("Delta Pre compress is %d\n",diff);
-            printf("Frac Pre compress is %x\n",currByte);
-            printf("Value written  = %x\n", *currBytePointer);
-            printf("Data Pre compress is = %x\n",curr);
+    
+            //printf("-----------------------\n");
+            //printf("Delta Pre compress is %d\n",diff);
+            //printf("Frac Pre compress is %x\n",currByte);
+            //printf("Value written  = %x\n", *currBytePointer);
+            //printf("Data Pre compress is = %x\n",curr);
         }
     }
 	return numBytes;
@@ -103,14 +103,14 @@ uint32_t decompressFixed24_8(uint8_t* in, unsigned* pointers, unsigned len, fixe
     int16_t currShort;
     int currData;
     int numBatches = ceil((float)len/(float)batchSize);
-    printf("Number of batches is %d\n", numBatches);
+    //printf("Number of batches is %d\n", numBatches);
     for (int currBatch = 0; currBatch < numBatches; currBatch++){
         //finding encoding
         baseIdx = pointers[currBatch];
         char compressable = in[baseIdx];
         baseIdx++; 
 
-        printf("Batch compression is %d\n",compressable);
+        //printf("Batch compression is %d\n",compressable);
         for(int currElem = currBatch*batchSize; currElem < currBatch*batchSize + batchSize && currElem < len; currElem++){
             if(compressable == 1){
                 memcpy(&currByte,&in[baseIdx],1);
@@ -118,10 +118,10 @@ uint32_t decompressFixed24_8(uint8_t* in, unsigned* pointers, unsigned len, fixe
                 memcpy(&currFrac,&in[baseIdx],1);
                 baseIdx += 1;
                 out[currElem].data = (((int)currByte +base) << 8) | (~mask24_8 & (int)currFrac); 
-                printf("-----------------------\n");
-                printf("Delta after compression = %d\n",currByte);
-                printf("Frac after compression = %x\n",currFrac);
-                printf("Data after compression = %x\n",out[currElem].data);
+                //printf("-----------------------\n");
+                //printf("Delta after compression = %d\n",currByte);
+                //printf("Frac after compression = %x\n",currFrac);
+                //printf("Data after compression = %x\n",out[currElem].data);
              }
             else if(compressable == 2){
                 memcpy(&currShort,&in[baseIdx],2);
@@ -129,10 +129,10 @@ uint32_t decompressFixed24_8(uint8_t* in, unsigned* pointers, unsigned len, fixe
                 memcpy(&currFrac,&in[baseIdx],1);
                 baseIdx += 1;
                 out[currElem].data = (((int)currShort +base) << 8) | (~mask24_8 & (int)currFrac); 
-                printf("-----------------------\n");
-                printf("Delta after compression = %d\n",currShort);
-                printf("Frac after compression = %x\n",currFrac);
-                printf("Data after compression = %x\n",out[currElem].data);
+                //printf("-----------------------\n");
+                //printf("Delta after compression = %d\n",currShort);
+                //printf("Frac after compression = %x\n",currFrac);
+                //printf("Data after compression = %x\n",out[currElem].data);
             }
             else if(compressable == 3){
                 memcpy(&out[currElem].data,&in[baseIdx],4);

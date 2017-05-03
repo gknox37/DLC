@@ -9,13 +9,11 @@
 #define M_SIZE 10
 #define RANDO_MIN  -500
 #define RANDO_MAX  500
-
 #define BATCH_SIZE 10
 
 int main(){
-    srand( time(NULL) );
-    
     //creating example input
+    srand( time(NULL) );
     fixed_point24_8* in = (fixed_point24_8*) malloc(sizeof(fixed_point24_8)*M_SIZE);
     fixed_point24_8* in_decom = (fixed_point24_8*) malloc(sizeof(fixed_point24_8)*M_SIZE);
     uint8_t* compressed_in = (uint8_t*) malloc(sizeof(fixed_point24_8)*M_SIZE*2 );//2 for safety
