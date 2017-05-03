@@ -1,5 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
 project (FixedPoint)
+find_package(CUDA QUIET REQUIRED)
 
 # The version number.
 set (Tutorial_VERSION_MAJOR 1)
@@ -23,6 +24,7 @@ set (EXTRA_LIBS ${EXTRA_LIBS} lib)
 
 
 # add the executable
-add_executable(fixedPoint fixedPointCompressionExample.cpp)
+#add_executable(fixedPoint fixedPointCompressionExample.cpp)
+cuda_add_executable(fixedPoint main.cu)
 target_link_libraries (fixedPoint  ${EXTRA_LIBS})
 
