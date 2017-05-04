@@ -10,8 +10,8 @@
 #define M_SIZE 100000
 #define RANDO_MIN  -1
 #define RANDO_MAX  1
-#define BATCH_SIZE 10
-#define BATCHES_PER_BLOCK 10
+#define BATCH_SIZE 32 //Compressed elements per batch
+#define BATCHES_PER_BLOCK 2
 
 #define ITER 1
 #define NOT_COMP 0
@@ -21,30 +21,35 @@
 
 //each thread processes a block
 __global__ void decompress_fixed24_8_gpu(uint8_t* in, unsigned* pointers, unsigned len, fixed_point24_8* out, uint32_t batchSize, int numBatches) {
+	
 	__shared__ uint8_t schemes[BATCHES_PER_BLOCK];
 	__shared__ unsigned startPos[BATCHES_PER_BLOCK];
 
     int idx = threadIdx.x + blockIdx.x*blockDim.x;	
     int batchIdx = idx % batchSize;
     int myBatch = ((float)idx/(float)len)* numBatches;
-	int localBatchNum = myBatch%BATCHES_PER_BLOCK;
-	int myNum;
-
+	int localBatchNum = myBatch%BATCHES_PER_BLOCK; //perBlock'
+	int16_t myNum;
+	
+	
 	//rep thread gets compression scheme
 	if(batchIdx == 0){
 		startPos[localBatchNum] = pointers[myBatch];
-    	schemes[localBatchNum] = in[startPos[localBatchNum]];
+    	//schemes[localBatchNum] = in[startPos[localBatchNum]]; //TODO BREAKS
 	}
 	__syncthreads();
 	
     //copying results
-	//if (idx < len){
-	//	memcpy(&myNum, &in[startPos[localBatchNum] + 1 + 2*batchIdx], 2);
-    //	out[idx].data = (int16_t)(((myNum&0xffffff00) >> 8)   |  ((myNum & 0x000000ff) <<8));
-	//}
-	if(idx < len){
-		out[idx].data = myNum;
+	unsigned myStart = startPos[localBatchNum];
+	
+	
+	if (idx < len){
+		//memcpy(&myNum, &in[myStart + 1 + 2*batchIdx], 2);
+    	//out[idx].data = (int16_t)(((myNum&0xffffff00) >> 8)   |  ((myNum & 0x000000ff) <<8));
+		out[idx].data = myBatch;
 	}
+	
+	
 	
 }
 
@@ -74,14 +79,11 @@ int main() {
     int numBatches = ceil((float)M_SIZE / (float)BATCH_SIZE);
     int worstCaseBytes = M_SIZE*(sizeof(fixed_point24_8) + 1) + numBatches*sizeof(unsigned);
 	cudaProfilerStart();
-    //for(int count = 0; count < ITER*2; count ++){
-        //mode = count %2;
 	mode = 1;
     
     /*Allocating host space for data */
     in = (fixed_point24_8*) malloc(sizeof(fixed_point24_8)*M_SIZE);
     in_decompressed = (fixed_point24_8*) malloc(sizeof(fixed_point24_8)*M_SIZE);
-	//memset(in_decompressed,0,sizeof(fixed_point24_8)*M_SIZE);
     in_compressed = (uint8_t*) malloc(worstCaseBytes);
     pointers = (unsigned*) malloc((numBatches) * sizeof(unsigned));
     //creating random values 
@@ -106,23 +108,48 @@ int main() {
 		timeSpent =  ((double)(end - begin)* 1000.0 )/ (CLOCKS_PER_SEC);
 		printf("Compression Time: %f ms\n", timeSpent);
 		begin = clock();
+
+		
+		//looking at pointers
+		/*
+		for( int i = 0; i< numBatches; i++){
+			printf("BatchNumber = %d | pointer = %d\n",i,pointers[i]);
+		}	
+		return 0;	
+		*/
+
+		//comparing matricies
+		/*
+		int retVal = decompressFixed24_8(in_compressed, pointers, M_SIZE, in_decompressed, BATCH_SIZE);
+		for(int i = 0; i < M_SIZE; i++){
+		    int sub = in[i].data - in_decompressed[i].data; 
+		    //printf("i=%d| %d - %d = %d\n", i, in[i].data, in_decompressed[i].data, sub);
+		    if(sub != 0){
+		        printf("ERROROROROROR\n");
+		        return -1;
+		    }
+		}
+		printf("Matricies match for cpu!!!\n");	
+		return;
+		//*/
+		
 		
 		/*Copying host to device*/
 		printf("Number of bytes to copy = %d\n",numBytes);
 		printf("Number of batches = %d\n",numBatches);
 		cudaMemcpy(in_compressed_D, in_compressed, numBytes, cudaMemcpyHostToDevice);
 		cudaMemcpy(pointers_D, pointers, numBatches*sizeof(unsigned), cudaMemcpyHostToDevice);
-		cudaMemset(out_decompressed_D,0, M_SIZE*sizeof(fixed_point24_8)); //TODO Check if writing output array is necessary
-		//TODO Check if writing output array is necessary
+		cudaMemset(out_decompressed_D,0, M_SIZE*sizeof(fixed_point24_8)); 
 
 		/*Launching kernel*/
 		xWidth = BATCH_SIZE * BATCHES_PER_BLOCK; yWidth =1;
 		numXBlocks = ceil((float)M_SIZE/(float)xWidth); numYBlocks = 1;
 		printf("xWidth = %d\n",xWidth);
 		printf("numXBlocks = %d\n",numXBlocks);
-		dim3 dimGrid(numXBlocks, numYBlocks,1);
-		dim3 dimBlock(xWidth, yWidth,1);
-		decompress_fixed24_8_gpu<<<dimGrid,dimBlock>>>(in_compressed_D, pointers_D, M_SIZE, out_decompressed_D, BATCH_SIZE, numBatches); //TODO SIZE_M used to be cudaDeviceSynchronize();
+		//dim3 dimGrid(numXBlocks, numYBlocks,1);
+		//dim3 dimBlock(xWidth, yWidth,1);
+		decompress_fixed24_8_gpu<<<numXBlocks,xWidth>>>(in_compressed_D, pointers_D, M_SIZE, out_decompressed_D, BATCH_SIZE, numBatches); 
+		cudaDeviceSynchronize();
 
 		/*Ending Timer*/
 		end = clock();    
@@ -135,7 +162,7 @@ int main() {
 	    begin = clock();
         
         /*Copying host to device*/
-        cudaMemcpy(in_compressed_D, in, M_SIZE*sizeof(fixed_point24_8), cudaMemcpyHostToDevice); // remember this is the uncompressed array
+        cudaMemcpy(in_compressed_D, in, M_SIZE*sizeof(fixed_point24_8), cudaMemcpyHostToDevice); // remember this is the uncompresbatchIdxsed array
 		cudaMemset(out_decompressed_D,0, M_SIZE*sizeof(fixed_point24_8)); //TODO Check if writing output array is necessary
 
         /*Launching kernel*/
@@ -154,21 +181,21 @@ int main() {
 
     /*Copying memory back*/
     cudaMemcpy(in_decompressed, out_decompressed_D , M_SIZE*sizeof(fixed_point24_8), cudaMemcpyDeviceToHost);
+	cudaDeviceSynchronize();
 
     /*Checking valid decompressed data*/
     match = 1;
     for(int i =0; i < M_SIZE && TEST_MAT == 1; i++){
         if(in_decompressed[i].data != in[i].data){
             //printf("i=%d|Difference with %x and %x\n",i,in_decompressed[i].data, in[i].data);
-			//printf("i=%d|Value %d\n",i,in_decompressed[i].data);
+			printf("i=%d|Value %d\n",i,in_decompressed[i].data);
             match = 0;
-			if(i>50){}
-				//break; 
         }
     }
     if(match){
         printf("Matricies match\n");
     }
+
     cudaProfilerStop();
     /*Freeing memory*/
     //Host
