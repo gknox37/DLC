@@ -14,8 +14,8 @@
 #include "utils.hpp"
 using namespace std;
 
-#define Algo_blockSize 1024 //This is number of bytes per compression block
-#define SCAN_BLOCK_SIZE 512
+#define Algo_blockSize 1024 //16 //This is number of bytes per compression block
+#define SCAN_BLOCK_SIZE 512 //8
 //This is not number of threads in a ThreadBlock
 
 
@@ -60,26 +60,26 @@ __global__ void scan_n(int16_t* input, int* output, int len){
     else{
         val = (int) input[start+tx-1];
         if( val == 5 or val == 9 or val == 13)
-            partialSum[tx] = 1;
+            partialSum[tx] = (int) 1;
         else if( val==6 or val==10 or val==14)
-            partialSum[tx] = 2;
+            partialSum[tx] = (int) 2;
         else if( val==7 or val==11 or val==15)
-            partialSum[tx] = 4;
+            partialSum[tx] = (int) 4;
         else if (val <0)
-            partialSum[tx] = -val;
+            partialSum[tx] = (int) -val;
     }
     if (start + blockDim.x + tx >= len)
         partialSum[tx+blockDim.x] = 0;
     else{
         val = (int) input[start+blockDim.x+tx-1];
         if( val == 5 or val == 9 or val == 13)
-            partialSum[tx+blockDim.x] = 1;
+            partialSum[tx+blockDim.x] = (int) 1;
         else if( val==6 or val==10 or val==14)
-            partialSum[tx+blockDim.x] = 2;
+            partialSum[tx+blockDim.x] = (int) 2;
         else if( val==7 or val==11 or val==15)
-            partialSum[tx+blockDim.x] = 4;
+            partialSum[tx+blockDim.x] = (int) 4;
         else if (val <0)
-            partialSum[tx+blockDim.x] = -val;
+            partialSum[tx+blockDim.x] = (int) -val;
     }
     __syncthreads();
     //PreScan setup
@@ -176,15 +176,20 @@ __global__ void decompress_n(char* input, long* output, int16_t* devCompressedTa
     int blockNum = floorf(temp); //Floor rounds down to integer
     //blockStart[blockNum-1] <-- This is starting of a block in Byte index in input array.
     if(tx < numElements){
-        int start = blockStart[blockNum - 1];
+        int start = blockStart[blockNum];
         
-        /*int16_t curr_size = devCompressedTable[blockNum];
-        if(curr_size == 5 or curr_size == 9 or curr_size ==13)
-            output[tx] = (uint8_t) input[start] + blockBase[blockNum];
-        else if(curr_size == 6 or curr_size == 10 or curr_size ==14)
-            output[tx] = (uint16_t) input[start] + blockBase[blockNum];
+        int16_t curr_size = devCompressedTable[blockNum];
+        /*if(curr_size == 5 or curr_size == 9 or curr_size ==13)
+            memcpy(&output[tx], &input[start], sizeof(uint8_t));
+            //output[tx] = (long)((uint8_t) input[start]);// + (uint8_t) blockBase[blockNum]);
+        //else if(curr_size == 6 or curr_size == 10 or curr_size ==14)
+            //memcpy(&output[tx], &input[start], sizeof(uint16_t));
+            //output[tx] = (long)((uint16_t) input[start]);// + (uint16_t) blockBase[blockNum]);
         else if(curr_size == 7 or curr_size == 11 or curr_size ==15)
-            output[tx] = (uint32_t) input[start] + blockBase[blockNum];*/
+            memcpy(&output[tx], &input[start], sizeof(uint32_t));
+            //output[tx] = (long)((uint32_t) input[start]);// + (uint32_t) blockBase[blockNum]);
+        else if (curr_size <0)
+            memcpy(&output[tx], &input[start], -1*curr_size);*/
     }
 }
 
@@ -642,7 +647,7 @@ return bytesCopied;
 
 
 int main(int argc, char **argv) {
-    
+    //check_success(cudaProfilerStart());
     if (argc !=2 ){
         cerr << "This program perfoms Compression on CPU and Decompression on GPU\n"
         << "Load file to compress as input argument\n"
@@ -754,7 +759,7 @@ int main(int argc, char **argv) {
     x = ceil(numElements/1024.0);
     dim3 DecomGrid(x, 1, 1);
     dim3 DecomBlock(1024, 1, 1);
-    decompress_n<<<DecomGrid, DecomBlock>>>(devCompressed, devDecompressed, devCompressedTable, devBlockStart, devBaseVals, numElements);
+    //decompress_n<<<DecomGrid, DecomBlock>>>(devCompressed, devDecompressed, devCompressedTable, devBlockStart, devBaseVals, numElements);
     //decompress_kernel_k<<<Grid, Block>>>( devDecompressed, devCompressed, numBlocks, devIsCompressed, devBaseVals);
     cudaDeviceSynchronize();
     
@@ -770,7 +775,7 @@ int main(int argc, char **argv) {
     delete[] compressed;
     // Free Device Memory
     // ----------------------------------------
-    
+    //check_success(cudaProfilerStop());
     
     printf("numBlocks = %d\n",numBlocks);
     printf("numBytesBeforeCompress = %d\n", numBytesBeforeCompress);
@@ -781,16 +786,17 @@ int main(int argc, char **argv) {
     //for ( i=0; i < numBlocks; i++)
     //    printf("from GPU:%d\n", newdebug[i]);
     for ( i=0; i < numBlocks; i++)
-        printf("Scan:%d\n", BlockStart[i]);
-    //long * l_array = (long*)&Decompressed[0] ;
+        printf("Scan:%d\n", (int)BlockStart[i]);
+    long * l_array = (long*)&Decompressed[0] ;
     for (i = 0 ; i < longArraySize ; i++)
     {
-      printf("Dec:%ld\n" , Decompressed[i]) ;
+      printf("Dec:%ld\n" , l_array[i]) ;
     } 
     cudaFree(devCompressed);
     cudaFree(devDecompressed);
     cudaFree(devCompressedTable);
     cudaFree(devBlockStart);
     cudaFree(devBaseVals);
+    
     return 0;
 }
