@@ -27,4 +27,10 @@ commands:
     # http://stackoverflow.com/a/21699210/3543720 for info
     - >-
       ./fixedPoint
+    - >-
+      nvprof --cpu-profiling on --export-profile timeline.nvprof --
+      ./fixedPoint
+    - >-
+      nvprof --cpu-profiling on --export-profile analysis.nvprof --analysis-metrics --
+      ./fixedPoint
       
