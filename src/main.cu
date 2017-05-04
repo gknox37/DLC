@@ -53,29 +53,31 @@ __global__ void scan_n(int16_t* input, int* output, int len){
     int start = 2*blockIdx.x*blockDim.x;
     int val;
     
+    if(blockIdx.x == 0 && tx == 0)
+        partialSum[tx] = 0;
     if(start + tx >= len)
         partialSum[tx] = 0;
     else{
-        val = (int) input[start+tx];
+        val = (int) input[start+tx-1];
         if( val == 5 or val == 9 or val == 13)
-            partialSum[tx] = (int) 1;
+            partialSum[tx] = 1;
         else if( val==6 or val==10 or val==14)
-            partialSum[tx] = (int) 2;
+            partialSum[tx] = 2;
         else if( val==7 or val==11 or val==15)
-            partialSum[tx] = (int) 4;
+            partialSum[tx] = 4;
         else if (val <0)
             partialSum[tx] = -val;
     }
     if (start + blockDim.x + tx >= len)
         partialSum[tx+blockDim.x] = 0;
     else{
-        val = (int) input[start+blockDim.x+tx];
+        val = (int) input[start+blockDim.x+tx-1];
         if( val == 5 or val == 9 or val == 13)
-            partialSum[tx+blockDim.x] = (int) 1;
+            partialSum[tx+blockDim.x] = 1;
         else if( val==6 or val==10 or val==14)
-            partialSum[tx+blockDim.x] = (int) 2;
+            partialSum[tx+blockDim.x] = 2;
         else if( val==7 or val==11 or val==15)
-            partialSum[tx+blockDim.x] = (int) 4;
+            partialSum[tx+blockDim.x] = 4;
         else if (val <0)
             partialSum[tx+blockDim.x] = -val;
     }
@@ -167,7 +169,7 @@ __global__ void scan_n(int16_t* input, int* output, int len){
 //dim3 DecomGrid(x, 1, 1);
 //dim3 DecomBlock(1024, 1, 1);
 //decompress_n(devCompressed, devDecompressed, devBlockStart, devBaseVals, numElements);
-__global__ void decompress_n(char* input, long* output, int* blockStart, long* blockBase, int numElements){
+__global__ void decompress_n(char* input, long* output, int16_t* devCompressedTable, int* blockStart, long* blockBase, int numElements){
     int tx = threadIdx.x + blockIdx.x * blockDim.x;
     //tx is the Element number
     float temp = tx/Algo_blockSize;
@@ -175,7 +177,14 @@ __global__ void decompress_n(char* input, long* output, int* blockStart, long* b
     //blockStart[blockNum-1] <-- This is starting of a block in Byte index in input array.
     if(tx < numElements){
         int start = blockStart[blockNum - 1];
-        output[tx] = input[start] + blockBase[blockNum];
+        
+        /*int16_t curr_size = devCompressedTable[blockNum];
+        if(curr_size == 5 or curr_size == 9 or curr_size ==13)
+            output[tx] = (uint8_t) input[start] + blockBase[blockNum];
+        else if(curr_size == 6 or curr_size == 10 or curr_size ==14)
+            output[tx] = (uint16_t) input[start] + blockBase[blockNum];
+        else if(curr_size == 7 or curr_size == 11 or curr_size ==15)
+            output[tx] = (uint32_t) input[start] + blockBase[blockNum];*/
     }
 }
 
@@ -552,7 +561,7 @@ return bytesCopied;
  
 }
 
-int decompress ( char * compressed , char * decompressed , int bytesCopied , long *baseVals , int16_t *isCompressed , int numBlocks)
+/*int decompress ( char * compressed , char * decompressed , int bytesCopied , long *baseVals , int16_t *isCompressed , int numBlocks)
 {
     int i = 0;
     int offset_compressed = 0;
@@ -620,7 +629,7 @@ int decompress ( char * compressed , char * decompressed , int bytesCopied , lon
       }
 
     return offset_decompressed ; 
-}  
+}*/
           
          
       
@@ -696,12 +705,12 @@ int main(int argc, char **argv) {
     int numBytesAfterCompress = bytesCopied;
     const auto stop = now() ;
     const auto elapsed = std::chrono::duration<double, std::milli>(stop - start).count();
-    std::cout << "Time to compress on CPU = " << elapsed << " milliseconds.";
+    std::cout << "Time to compress on CPU = " << elapsed << " milliseconds.\n";
     //printf("Length , Bytes copied  : %d , %d\n", numBytesBeforeCompress, bytesCopied) ;
 
     float compression_ratio = (float)(numBytesBeforeCompress)/(float)(numBlocks*(sizeof(long) + sizeof(int16_t)) + bytesCopied) ;
     for ( i = 0 ; i < numBlocks ; i++){
-      printf("Base value , compressed info , Ratio : %lu , %d\n , %f\n", baseVals[i] , isCompressed[i] , compression_ratio) ;
+      printf("Base value=%lu , compressed info=%d , Ratio=%f\n", baseVals[i] , isCompressed[i] , compression_ratio) ;
     }
     
     char* Decompressed = new char[numBytesBeforeCompress] ;
@@ -718,15 +727,15 @@ int main(int argc, char **argv) {
     long* devBaseVals ;
     int* devBlockStart;
     int sizeCompressedTable = numBlocks * sizeof(int16_t);
-    int sizeBaseVals = numBlocks*sizeof(long);
+    int sizeBaseVals = numBlocks * sizeof(long);
     
     cudaMalloc(&devCompressed,      numBytesAfterCompress);
     cudaMalloc(&devDecompressed,    numBytesBeforeCompress);
     cudaMalloc(&devCompressedTable, sizeCompressedTable);
-    cudaMalloc(&devBlockStart,      sizeCompressedTable);
+    cudaMalloc(&devBlockStart,      numBlocks*sizeof(int));
     cudaMalloc(&devBaseVals,        sizeBaseVals) ;
     // -------- Transfer to GPU -----------
-    cudaMemcpy(devCompressed,       compressed,     bytesCopied,            cudaMemcpyHostToDevice);
+    cudaMemcpy(devCompressed,       compressed,     numBytesAfterCompress,  cudaMemcpyHostToDevice);
     cudaMemcpy(devCompressedTable,  isCompressed,   sizeCompressedTable,    cudaMemcpyHostToDevice);
     cudaMemcpy(devBaseVals,         baseVals,       sizeBaseVals,           cudaMemcpyHostToDevice);
       
@@ -745,19 +754,23 @@ int main(int argc, char **argv) {
     x = ceil(numElements/1024.0);
     dim3 DecomGrid(x, 1, 1);
     dim3 DecomBlock(1024, 1, 1);
-    decompress_n<<<DecomGrid, DecomBlock>>>(devCompressed, devDecompressed, devBlockStart, devBaseVals, numElements);
+    decompress_n<<<DecomGrid, DecomBlock>>>(devCompressed, devDecompressed, devCompressedTable, devBlockStart, devBaseVals, numElements);
     //decompress_kernel_k<<<Grid, Block>>>( devDecompressed, devCompressed, numBlocks, devIsCompressed, devBaseVals);
     cudaDeviceSynchronize();
     
-    int* BlockStart = new int[sizeCompressedTable];
-    cudaMemcpy(BlockStart,   devBlockStart,     sizeCompressedTable,    cudaMemcpyDeviceToHost) ;
+    int* BlockStart = new int[numBlocks*sizeof(int)];
+    //int* newdebug = new int[numBlocks*sizeof(int)];
+    //cudaMemcpy(newdebug,     devCompressedTable,sizeCompressedTable,    cudaMemcpyDeviceToHost) ;
+    cudaMemcpy(BlockStart,   devBlockStart,     numBlocks*sizeof(int),  cudaMemcpyDeviceToHost) ;
     cudaMemcpy(Decompressed, devDecompressed,   numBytesBeforeCompress, cudaMemcpyDeviceToHost) ;
     // get elapsed time in milliseconds
     // elapsed = std::chrono::duration<double, std::milli>(end_decompress - start_decompress).count();
     // std::cout << "De-Compression in GPU time = " << elapsed << " milliseconds.";
+    cudaDeviceSynchronize();
     delete[] compressed;
     // Free Device Memory
     // ----------------------------------------
+    
     
     printf("numBlocks = %d\n",numBlocks);
     printf("numBytesBeforeCompress = %d\n", numBytesBeforeCompress);
@@ -765,12 +778,14 @@ int main(int argc, char **argv) {
     printf("numBytesAfterCompress = %d\n", numBytesAfterCompress);
     for ( i = 0 ; i< numBlocks ; i++)
         printf("IsCompressed:%d\n" , (int)isCompressed[i] ) ;
+    //for ( i=0; i < numBlocks; i++)
+    //    printf("from GPU:%d\n", newdebug[i]);
     for ( i=0; i < numBlocks; i++)
-        printf("Scan:%d\n", (int) BlockStart[i]);
-    long * l_array = (long*)&Decompressed[0] ;
+        printf("Scan:%d\n", BlockStart[i]);
+    //long * l_array = (long*)&Decompressed[0] ;
     for (i = 0 ; i < longArraySize ; i++)
     {
-      printf("Dec:%ld\n" , l_array[i]) ;
+      printf("Dec:%ld\n" , Decompressed[i]) ;
     } 
     cudaFree(devCompressed);
     cudaFree(devDecompressed);
