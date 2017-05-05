@@ -243,64 +243,6 @@ int chunkGranularity = (localVal <=0) ? 1 : localChunkSize ;
   __syncthreads() ;
 }             
    
-__global__ void decompress_kernel_lai  ( char * decompressed , char * compressed , int numBlocks , int32_t * isCompressedMatrix , long * baseVals)
-{
-
-    int tx = blockDim.x*blockIdx.x + threadIdx.x;
-    //using thread coarsening to optimize the code
-    if(tx < numBlocks)
-    {
-        int start = isCompressedMatrix[tx];
-        int end = isCompressedMatrix[tx+1];
-        int offset = end - start;
-        int offset_compressed = isCompressedMatrix[tx];
-        int offset_decompressed = tx*blockSize;
-
-        if (offset == 32 || ((tx+1) == numBlocks && (offset == 32 ))){
-            memcpy(&decompressed[offset_decompressed] , &compressed[offset_compressed] , offset);
-            return;
-        }
-        
-        // If code reaches this point then actual compression has taken place 
-        // assume is long array. numLongABlock is # long data in a block
-        int numLongABlock = 32/8;
-        int chunk_size = 8;
-
-        int compressed_size = offset/numLongABlock;
-        int numPtrs = blockSize/chunk_size ;
-        int j ;
-
-        for (j = 0 ; j < numPtrs ; ++j)
-        {
-            if (chunk_size ==2 )
-            {
-              int16_t num = 0;
-              memcpy(&num, (char *)&compressed[offset_compressed], compressed_size);
-              num += baseVals[tx];
-              memcpy(&decompressed[offset_decompressed] , &num , chunk_size) ;
-
-            }
-            else if (chunk_size ==4)
-            {
-              int32_t num = 0;
-              memcpy(&num, (char *)&compressed[offset_compressed], compressed_size);
-              num += baseVals[tx];
-              memcpy(&decompressed[offset_decompressed] , &num , chunk_size) ;
-
-            }
-            else
-            {
-              long num = 0;
-              memcpy(&num, (char *)&compressed[offset_compressed], compressed_size);
-              num += baseVals[tx];
-              memcpy(&decompressed[offset_decompressed] , &num , chunk_size) ;
-
-             }
-           offset_compressed += compressed_size ; 
-           offset_decompressed += chunk_size ; 
-        }
-    } 
-}  
 
 int bdCompress(char* input, int len, char * compressed,  int16_t * isCompressed, long * baseVals)
 {
@@ -591,48 +533,8 @@ int decompress ( char * compressed , char * decompressed , int bytesCopied , lon
     return offset_decompressed ;
 }
 
-void scan_cpu(int16_t *isCompressed, int32_t *isCompressedMatrix, int numBlocks)
-{
-    isCompressedMatrix[0] = 0;
-    for (int i = 0 ; i <numBlocks ; i++) // decompress every block
-    {
-        if(isCompressed[i] ==0)
-        {
-          isCompressedMatrix[i+1] = isCompressedMatrix[i] + blockSize;
-          continue; 
-        }
 
-        if (isCompressed[i] <0)
-        {
-          int bytes_to_copy = -1* isCompressed[i];
-          isCompressedMatrix[i+1] = isCompressedMatrix[i] + bytes_to_copy;
-          break ;
-        }
 
-        // If code reaches this point then actual compression has taken place 
-        //chunksize -> size of each decompressed element in block (bytes), compressed size -> size of each compressed element in block (bytes)
-        int chunk_size ;
-        int compressed_size = 0;
-        if(isCompressed[i] % 4==1)
-           compressed_size = 1 ;
-        else if (isCompressed[i]%4 ==2)
-           compressed_size = 2 ;
-        else
-           compressed_size = 4 ; 
-        
-        if((isCompressed[i] / 4 ) ==1 )
-           chunk_size = 2  ;
-        else if ((isCompressed[i]/4) ==2)
-           chunk_size = 4 ;
-        else 
-           chunk_size = 8 ;
-        
-        int numPtrsInBlock = blockSize/chunk_size;
-        isCompressedMatrix[i+1] = isCompressedMatrix[i] + compressed_size*numPtrsInBlock;
-        //printf("starting: %d, end: %d, compressed_size: %d, numPtrsInBlock:%d \n", isCompressedMatrix[i], isCompressedMatrix[i+1], compressed_size, numPtrsInBlock );
-    }
-    return ;
-}   
 
 int main(int argc , char *argv[])
 {
@@ -641,7 +543,7 @@ int main(int argc , char *argv[])
         << "Load file to compress as input argument\n"
         << "Sample usage: \n"
         << argv[0]
-        << " input_65536.raw\n";
+        << " input512.raw\n";
         return -1;
     }
     
@@ -692,7 +594,6 @@ int main(int argc , char *argv[])
     
     long baseVals[numBlocks] ;
     int16_t  isCompressed[numBlocks] ;
-    int32_t  isCompressedMatrix[numBlocks+1] ; 
     char * compressed = (char*) malloc(numBytesBeforeCompress) ; //Compressed table should be big enough as uncompressed data
     initArray(numBlocks , isCompressed) ;
     const auto start = now();
@@ -716,19 +617,15 @@ int main(int argc , char *argv[])
     char * devCompressedArray ;
     char * devDecompressedArray ;  
     int16_t* devIsCompressed ;
-    int32_t* devIsCompressedMatrix;//with index, numBlocks, devIsCompressedMatrix[index] will give you the starting address in decompressed array and devIsCompressedMatrix[index+1] will give you the ending address  
     long * devBaseVals ;
-    scan_cpu(isCompressed, isCompressedMatrix, numBlocks); // convert int16_t* isCompressed to int32_t* isCompressedMatrix. By this mean, sacrifice some transfer rate to save computation time in scan_gpu 
     
     cudaMalloc(&devCompressedArray, bytesCopied);
     cudaMalloc(&devDecompressedArray , longArraySize * sizeof(long));
     cudaMalloc(&devIsCompressed , numBlocks * sizeof(int16_t)) ; 
-    cudaMalloc(&devIsCompressedMatrix, (numBlocks+1) * sizeof(int32_t));
     cudaMalloc(&devBaseVals , numBlocks*sizeof(long)) ;  
     const auto transferCPU_GPU_begin = now(); 
     cudaMemcpy(devCompressedArray, compressed , bytesCopied, cudaMemcpyHostToDevice);
     cudaMemcpy(devIsCompressed , isCompressed , numBlocks * sizeof(int16_t) , cudaMemcpyHostToDevice) ; 
-    cudaMemcpy(devIsCompressedMatrix , isCompressedMatrix , (numBlocks+1) * sizeof(int32_t) , cudaMemcpyHostToDevice) ; 
     cudaMemcpy(devBaseVals , baseVals , numBlocks * sizeof(long) , cudaMemcpyHostToDevice) ;
       
     const auto transferCPU_GPU_end = now();
@@ -738,13 +635,10 @@ int main(int argc , char *argv[])
     
     // Decompress in GPU
     // ----------------------------------------
-    //dim3 Grid(numBlocks, 1, 1);
-    //dim3 Block(blockSize/2, 1, 1);
-    dim3 Grid(ceil((float)numBlocks/512), 1, 1);
-    dim3 Block(512, 1, 1);
+    dim3 Grid(numBlocks, 1, 1);
+    dim3 Block(blockSize/2, 1, 1);
     const auto start_decompress = now() ;
-    //decompress_kernel<<<Grid, Block>>>( devDecompressedArray, devCompressedArray , numBlocks , devIsCompressed , devBaseVals);
-    decompress_kernel_lai<<<Grid, Block>>>( devDecompressedArray, devCompressedArray , numBlocks , devIsCompressedMatrix , devBaseVals);
+    decompress_kernel<<<Grid, Block>>>( devDecompressedArray, devCompressedArray , numBlocks , devIsCompressed , devBaseVals);
     cudaDeviceSynchronize();
     const auto end_decompress = now() ;
     const auto elapsed2 = std::chrono::duration<double,std::milli>(end_decompress - start_decompress).count() ;
