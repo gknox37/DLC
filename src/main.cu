@@ -783,7 +783,8 @@ int main(int argc, char **argv) {
         file_in >> longArraySize;
     }
     printf("total lines = %d\n", longArraySize);
-    long inputArray[longArraySize];
+    long * inputArray = (long*) malloc(longArraySize*sizeof(long));
+    //long inputArray[longArraySize];
     if (file_in.is_open()) {
         for( int i =0; i < longArraySize; i++) {
             //while ( std::getline (file_in,line) ){
@@ -815,7 +816,8 @@ int main(int argc, char **argv) {
 
     long baseVals[numBlocks] ;
     int16_t  isCompressed[numBlocks] ;
-    char* compressed = new char[numBytesBeforeCompress] ; //Compressed table should be big enough as uncompressed data
+    char * compressed = (char*) malloc(numBytesBeforeCompress);
+    //char* compressed = new char[numBytesBeforeCompress] ; //Compressed table should be big enough as uncompressed data
     initArray(numBlocks, isCompressed) ;
     const auto start = now() ;
     int bytesCopied = bdCompress((char*)inputArray, numBytesBeforeCompress, compressed, isCompressed, baseVals) ;
@@ -827,10 +829,11 @@ int main(int argc, char **argv) {
 
     float compression_ratio = (float)(numBytesBeforeCompress)/(float)(numBlocks*(sizeof(long) + sizeof(int16_t)) + bytesCopied) ;
     for ( i = 0 ; i < numBlocks ; i++){
-      printf("Base value=%lu , compressed info=%d , Ratio=%f\n", baseVals[i] , isCompressed[i] , compression_ratio) ;
+      //printf("Base value=%lu , compressed info=%d , Ratio=%f\n", baseVals[i] , isCompressed[i] , compression_ratio) ;
     }
 
-    char* Decompressed = new char[numBytesBeforeCompress] ;
+    char * Decompressed = (char*) malloc(numBytesBeforeCompress) ;
+    //char* Decompressed = new char[numBytesBeforeCompress] ;
     /*//int bytes = decompress(compressed , decompressed , bytesCopied , baseVals , isCompressed , numBlocks) ;
      printf("Bytes after decompression : %d\n" , bytes) ;
      bool t = (bytes == longArraySize * sizeof(long)) && (strncmp((char*)inputArray , decompressed , bytes) ==0) ;
@@ -882,7 +885,7 @@ int main(int argc, char **argv) {
     dim3 ScanBlock(SCAN_BLOCK_SIZE,1,1);
     dim3 DoubleBlock(SCAN_BLOCK_SIZE*2,1,1);
     scan_n<<<ScanGrid, ScanBlock>>>( devCompressedTable, devBlockStart, numBlocks); //<- change to exclusive scan
-    cudaDeviceSynchronize();
+    //cudaDeviceSynchronize();
     ExtractLast<<<ScanGrid, ScanBlock>>>(devBlockStart, sumBlockInput, numBlocks);
     scan_regular<<<ScanGrid, ScanBlock>>>(sumBlockInput, sumBlockScan, x);
     Finaladd<<<ScanGrid, DoubleBlock>>>(sumBlockScan, devBlockStart, numBlocks);
@@ -894,10 +897,10 @@ int main(int argc, char **argv) {
     //check_success(cudaMemcpy(Hostscan1output,   scan1output,     numBlocks*sizeof(float),  cudaMemcpyDeviceToHost));
     //check_success(cudaMemcpy(HostsumBlockInput, sumBlockInput,   numBlocks*sizeof(float),  cudaMemcpyDeviceToHost));
     //check_success(cudaMemcpy(HostsumBlockScan,  sumBlockScan,    num_sumBlockScan*sizeof(float),        cudaMemcpyDeviceToHost));
-    check_success(cudaMemcpy(BlockStart,        devBlockStart,   numBlocks*sizeof(float),    cudaMemcpyDeviceToHost)) ;
-    check_success(cudaDeviceSynchronize());
-    for ( i=0; i < numBlocks; i++)
-        printf("BlockStart%d=%f\n", i, BlockStart[i]);
+    //check_success(cudaMemcpy(BlockStart,        devBlockStart,   numBlocks*sizeof(float),    cudaMemcpyDeviceToHost)) ;
+    //check_success(cudaDeviceSynchronize());
+    //for ( i=0; i < numBlocks; i++)
+    //    printf("BlockStart%d=%f\n", i, BlockStart[i]);
     //for ( i=0; i < numBlocks; i++)
     //    printf("Scan2:%f\n", HostsumBlockInput[i]);
     //for ( i=0; i < num_sumBlockScan; i++)
@@ -938,10 +941,9 @@ int main(int argc, char **argv) {
     //for ( i=0; i < numBlocks; i++)
         //printf("Scan2nd:%d\n", (int)BlockStart[i]);
     long * l_array = (long*)&Decompressed[0] ;
-    for (i = 0 ; i < longArraySize ; i++)
-    {
-      printf("Dec:%ld     in %d\n" , l_array[i], i) ;
-    }
+    //for (i = 0 ; i < longArraySize ; i++)
+    //  printf("Dec:%ld     in %d\n" , l_array[i], i) ;
+    
 
     char* inputA = (char*)&inputArray[0];
     for (i =0; i < numBytesBeforeCompress; i++)
