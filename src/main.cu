@@ -196,9 +196,9 @@ __global__ void ExtractLast(float *input, float *output, int len){
 }
 
 // Block size is 2 * BLOCK_SIZE.
-__global__ void Finaladd(float *input, int *output, int len){
+__global__ void Finaladd(float *input, float *output, int len){
   if(blockIdx.x< ((len-1)/2*blockDim.x)) {
-    output[threadIdx.x+blockIdx.x*blockDim.x+blockDim.x]+= (int) input[blockIdx.x];
+    output[threadIdx.x+blockIdx.x*blockDim.x+blockDim.x]+= input[blockIdx.x];
   }
 }
 
@@ -837,6 +837,12 @@ int main(int argc, char **argv) {
     int sizeCompressedTable = numBlocks * sizeof(int16_t);
     int sizeBaseVals = numBlocks * sizeof(long);
 
+    int* BlockStart =          new int[numBlocks*sizeof(int)];
+    float* Hostscan1output =    (float*) malloc(numBlocks*sizeof(float));
+    float* HostsumBlockInput =  (float*) malloc(numBlocks*sizeof(float));
+    int num_sumBlockScan = ceil(numBlocks*SCAN_BLOCK_SIZE/2);
+    float* HostsumBlockScan =   (float*) malloc(num_sumBlockScan*sizeof(float));
+
     int* devBlockStart;
     float* scan1output;
     float* sumBlockInput;
@@ -845,16 +851,17 @@ int main(int argc, char **argv) {
     cudaMalloc(&devCompressed,      numBytesAfterCompress);
     cudaMalloc(&devDecompressed,    numBytesBeforeCompress);
     cudaMalloc(&devCompressedTable, sizeCompressedTable);
-    cudaMalloc(&devBaseVals,        sizeBaseVals) ;
+    cudaMalloc(&devBaseVals,        sizeBaseVals);
 
-    cudaMalloc(&devBlockStart,      numBlocks*sizeof(int));
-    cudaMalloc(&scan1output,        numBlocks*sizeof(float));
-    cudaMalloc(&sumBlockInput,      numBlocks*sizeof(float));
-    cudaMalloc(&sumBlockScan,       ceil(numBlocks*SCAN_BLOCK_SIZE/2)*sizeof(float));
+    cudaMalloc(&devBlockStart,              numBlocks*sizeof(int));
+    cudaMalloc((void**)&scan1output,        numBlocks*sizeof(float));
+    cudaMalloc((void**)&sumBlockInput,      numBlocks*sizeof(float));
+    cudaMalloc((void**)&sumBlockScan,       num_sumBlockScan*sizeof(float));
+    cudaMemset(scan1output, 0, numBlocks * sizeof(float));
     // -------- Transfer to GPU -----------
-    cudaMemcpy(devCompressed,       compressed,     numBytesAfterCompress,  cudaMemcpyHostToDevice);
-    cudaMemcpy(devCompressedTable,  isCompressed,   sizeCompressedTable,    cudaMemcpyHostToDevice);
-    cudaMemcpy(devBaseVals,         baseVals,       sizeBaseVals,           cudaMemcpyHostToDevice);
+    check_success(cudaMemcpy(devCompressed,       compressed,     numBytesAfterCompress,  cudaMemcpyHostToDevice));
+    check_success(cudaMemcpy(devCompressedTable,  isCompressed,   sizeCompressedTable,    cudaMemcpyHostToDevice));
+    check_success(cudaMemcpy(devBaseVals,         baseVals,       sizeBaseVals,           cudaMemcpyHostToDevice));
 
     // get elapsed time in milliseconds
     // const auto elapsed = std::chrono::duration<double, std::milli>(stop - start).count();
@@ -867,18 +874,28 @@ int main(int argc, char **argv) {
     dim3 ScanBlock(SCAN_BLOCK_SIZE,1,1);
     dim3 DoubleBlock(SCAN_BLOCK_SIZE*2,1,1);
     scan_n<<<ScanGrid, ScanBlock>>>( devCompressedTable, scan1output, numBlocks); //<- change to exclusive scan
+    cudaDeviceSynchronize();
     ExtractLast<<<ScanGrid, ScanBlock>>>(scan1output, sumBlockInput, numBlocks);
     scan_regular<<<ScanGrid, ScanBlock>>>(sumBlockInput, sumBlockScan, x);
-    Finaladd<<<ScanGrid, DoubleBlock>>>(sumBlockScan, devBlockStart, numBlocks);
-    cudaDeviceSynchronize();
+    Finaladd<<<ScanGrid, DoubleBlock>>>(sumBlockScan, scan1output, numBlocks);
+    check_success(cudaDeviceSynchronize());
     //Now devBlockStart will have starting location for each block in Compressed Array
-    int* BlockStart = new int[numBlocks*sizeof(int)];
+
+    //for ( i=0; i < numBlocks; i++)
+    //    printf("ScanBefore:%d\n", (int)BlockStart[i]);
+    check_success(cudaMemcpy(Hostscan1output,   scan1output,     numBlocks*sizeof(float),  cudaMemcpyDeviceToHost));
+    check_success(cudaMemcpy(HostsumBlockInput, sumBlockInput,   numBlocks*sizeof(float),  cudaMemcpyDeviceToHost));
+    check_success(cudaMemcpy(HostsumBlockScan,  sumBlockScan,    num_sumBlockScan*sizeof(float),        cudaMemcpyDeviceToHost));
+    check_success(cudaMemcpy(BlockStart,        devBlockStart,   numBlocks*sizeof(int),    cudaMemcpyDeviceToHost)) ;
+    check_success(cudaDeviceSynchronize());
     for ( i=0; i < numBlocks; i++)
-        printf("ScanBefore:%d\n", (int)BlockStart[i]);
-    cudaMemcpy(BlockStart,   devBlockStart,     numBlocks*sizeof(int),  cudaMemcpyDeviceToHost) ;
-    cudaDeviceSynchronize();
+        printf("Scan1:%f\n", Hostscan1output[i]);
     for ( i=0; i < numBlocks; i++)
-        printf("Scan1st:%d\n", (int)BlockStart[i]);
+        printf("Scan2:%f\n", HostsumBlockInput[i]);
+    //for ( i=0; i < num_sumBlockScan; i++)
+    //    printf("Scan3:%f\n", HostsumBlockScan[i]);
+    //for ( i=0; i < numBlocks; i++)
+    //    printf("Scan4:%d\n", BlockStart[i]);
 
     x = ceil(numElements/1024.0);
     dim3 DecomGrid(x, 1, 1);
