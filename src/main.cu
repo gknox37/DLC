@@ -266,7 +266,7 @@ __global__ void Finaladd(float *input, float *output, int len){
 __global__ void decompress_n(char* input, long* output, int16_t* devCompressedTable, float* blockStart, long* blockBase, int numElements){ //, int numElementsperBlock){
     int tx = threadIdx.x + blockIdx.x * blockDim.x;
     //tx is the Element number
-    int blockNum = floorf(tx/Algo_blockSize); //floorf(tx/numElementsperBlock)//Floor rounds down to integer
+    int blockNum = floorf(tx/(Algo_blockSize/sizeof(long))); //floorf(tx/numElementsperBlock)//Floor rounds down to integer
     //blockStart[blockNum-1] <-- This is starting of a block in Byte index in input array.
     if(tx < numElements){
         int start;
@@ -278,7 +278,7 @@ __global__ void decompress_n(char* input, long* output, int16_t* devCompressedTa
         long temp;
         int IDinBlock; //Location of current Element within compressed Block
         if(curr_size == 5 or curr_size == 9 or curr_size ==13){
-            IDinBlock = tx % Algo_blockSize * sizeof(uint8_t);
+            IDinBlock = tx % (Algo_blockSize /sizeof(long)); //<- Assuming always long at start
             start = start+IDinBlock;
             memcpy(&temp, &input[start], sizeof(uint8_t));
             output[tx] = temp + blockBase[blockNum];
@@ -286,7 +286,7 @@ __global__ void decompress_n(char* input, long* output, int16_t* devCompressedTa
             //output[tx] = (long)((uint8_t) input[start]);// + (uint8_t) blockBase[blockNum]);
         }
         else if(curr_size == 6 or curr_size == 10 or curr_size ==14){
-            IDinBlock = tx % Algo_blockSize * sizeof(uint16_t);
+            IDinBlock = tx % (Algo_blockSize /sizeof(long)); //<- Assuming always long at start
             start = start+IDinBlock;
             //output[tx] = (long) start;
             memcpy(&temp, &input[start], sizeof(uint16_t));
@@ -294,7 +294,7 @@ __global__ void decompress_n(char* input, long* output, int16_t* devCompressedTa
             //output[tx] = (long)((uint16_t) input[start]);// + (uint16_t) blockBase[blockNum]);
         }
         else if(curr_size == 7 or curr_size == 11 or curr_size ==15){
-            IDinBlock = tx % Algo_blockSize * sizeof(uint32_t);
+            IDinBlock = tx % (Algo_blockSize /sizeof(long)); //<- Assuming always long at start
             memcpy(&temp, &input[start], sizeof(uint32_t));
             output[tx] = temp + blockBase[blockNum];
             //output[tx] = (long)((uint32_t) input[start]);// + (uint32_t) blockBase[blockNum]);
@@ -897,7 +897,7 @@ int main(int argc, char **argv) {
     check_success(cudaMemcpy(BlockStart,        devBlockStart,   numBlocks*sizeof(float),    cudaMemcpyDeviceToHost)) ;
     check_success(cudaDeviceSynchronize());
     for ( i=0; i < numBlocks; i++)
-        printf("Scan1:%f\n", BlockStart[i]);
+        printf("BlockStart%d=%f\n", i, BlockStart[i]);
     //for ( i=0; i < numBlocks; i++)
     //    printf("Scan2:%f\n", HostsumBlockInput[i]);
     //for ( i=0; i < num_sumBlockScan; i++)
@@ -940,10 +940,17 @@ int main(int argc, char **argv) {
     long * l_array = (long*)&Decompressed[0] ;
     for (i = 0 ; i < longArraySize ; i++)
     {
-      printf("Dec:%ld\n" , l_array[i]) ;
+      printf("Dec:%ld     in %d\n" , l_array[i], i) ;
     }
-    int k = strncmp((char*)inputArray, Decompressed, numBytesBeforeCompress) ;
-    if(k==0) cout<<"SUCCESSFUL\n" ;
+
+    char* inputA = (char*)&inputArray[0];
+    for (i =0; i < numBytesBeforeCompress; i++)
+    {
+      if (inputA[i] != Decompressed[i])
+          printf("MISMATCH at index %d, Input=%c Decompress=%c\n", i, inputA[i], Decompressed[i]);
+    }
+    //int k = strncmp((char*)inputArray, Decompressed, numBytesBeforeCompress) ;
+    //if(k==0) cout<<"SUCCESSFUL\n" ;
     cudaFree(devCompressed);
     cudaFree(devDecompressed);
     cudaFree(devCompressedTable);
