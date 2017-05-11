@@ -1,0 +1,13 @@
+Design Overview
+Project: Compression for Deep Learning Applications
+Members: Gregory Knox, Haoming Lai, Namit Girdhar, Krishna Parasuram
+
+
+The ever expanding interest in Deep Neural Networks(DNNs) for machine learning applications has lead to an increase increase in the size and complexity of DNNs, allowing for higher precision and more accurate results. However, this comes with an additional  cost the extra memory need to store that network. In many cases inference and training of DNN's are done on GPU's with an ever increasing cost of host to device memory transfers. In our project we look to mitigate the cost of transferring DNN network information to GPU with fast host compression and fast device decompression.
+
+In order to accomplish this we have created two schemes for fast compression, fixed point based compression and integer based compression. Both schemes draw inspiration of fundamental concepts spoken about in the Mutlu("Base-Delta-Immediate Compression: Practical Data Compression for On-Chip Caches".2012).  The goal is to speed up the cpu-gpu data transfer time by first compressing the data and decompressing in the gpu.
+
+Effectively, stating that an array of elements with similar values can be compressed by expressing them as a single base value, and offset values for each individual element. This compression is most effective with regular data that are more or less similar to each other. Overall, this compression scheme targets the large weight and bias matrices that are present in the the deeper layers of a complex DNN. At a high level both algorithms iterate through an input array of uncompressed values, and segment them into batches. These batches are then compressed depending on the range of their values with respect to a base. The batches can then be quickly decompressed on the gpu. It is our hope that these compression algorithms will greatly reduce the overhead when moving data from host to device and allow for faster training/inference on DNNs.	
+    
+
+
