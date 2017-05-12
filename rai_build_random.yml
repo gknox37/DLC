@@ -1,0 +1,59 @@
+rai:
+  version: 0.2 # this is required
+  image: webgpu/cuda:ppc64le-8.0-devel
+  # image: nimbix/ubuntu-cuda-ppc64le:latest # nimbix/ubuntu-cuda-ppc64le:latest is a docker image
+                                             # You can specify any image found on dockerhub
+resources:
+  cpu:
+    architecture: ppc64le
+  gpu:
+    architecture: pascal
+    count: 1 # tell the system that you're using a gpu
+  network: false
+commands:
+  build:
+    - echo "Building project"
+    # Use CMake to generate the build files. Remember that your directory gets uploaded to /src
+    #- cmake /src
+    # Run the make file to compile the project.
+    - mv /src/src/main.cu /src/src/main_namit.cu
+    - mv /src/src/compress_optimized.cu /src/src/main.cu
+    - make -C /src
+    - ./ece508-final /src/data/input_10485760_random.raw
+    #- g++ /src/schemes/longCompress.c -o longCompress
+    #- ./longCompress
+
+    # here we break the long command into multiple lines. The Yaml
+    # format supports this using a block-strip command. See
+    # http://stackoverflow.com/a/21699210/3543720 for info- >-
+    - >-
+      nvprof --cpu-profiling on --export-profile timeline_D1.nvprof --
+      ./ece508-final /src/data/input_10485760_random.raw
+    - >-
+      nvprof --cpu-profiling on --export-profile analysis_D1.nvprof --analysis-metrics --
+      ./ece508-final /src/data/input_10485760_random.raw
+    - rm /src/src/main.cu
+    - mv /src/src/main_Lai.cu /src/src/main.cu
+    - make -C /src
+    - ./ece508-final /src/data/input_10485760_random.raw
+    - >-
+      nvprof --cpu-profiling on --export-profile timeline_D2.nvprof --
+      ./ece508-final /src/data/input_10485760_random.raw
+    - >-
+      nvprof --cpu-profiling on --export-profile analysis_D2.nvprof --analysis-metrics --
+      ./ece508-final /src/data/input_10485760_random.raw
+
+    - rm /src/src/main.cu
+    - mv /src/src/compress_reduced.cu /src/src/main.cu
+    - make -C /src
+    - ./ece508-final /src/data/input_10485760_random.raw
+    - >-
+      nvprof --cpu-profiling on --export-profile timeline_D1.2.nvprof --
+      ./ece508-final /src/data/input_10485760_random.raw
+    - >-
+      nvprof --cpu-profiling on --export-profile analysis_D1.2.nvprof --analysis-metrics --
+      ./ece508-final /src/data/input_10485760_random.raw
+
+
+    #- >-
+    #  ./ece508-final -i input1,input2 -o output
