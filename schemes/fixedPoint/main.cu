@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <iostream>
 #include <fstream> 
+#include <math.h>
 #include <time.h>
 #include "fixedPointCompress.h"
 #include <cuda_profiler_api.h>
@@ -46,15 +47,45 @@ __global__ void decompress_fixed24_8_gpu(uint8_t* in, unsigned* pointers, unsign
 	
 }
 
-__global__ void decompress_fixed24_8_gpu_dummy(uint8_t* in, unsigned len, fixed_point24_8* out, uint32_t batchSize) {
+__global__ void decompress_fixed24_8_gpu_dummy(uint8_t* in, unsigned len, fixed_point24_8* out, uint32_t batchSize){
   return;
+}
+
+//determining size of each batch and writing into pointers
+__global__ void compress_fixed24_8_gpu_histo(fixed_point24_8* in, unsigned len, uint32_t batchSize,unsigned* pointers){
+  int idx = threadIdx.x + blockIdx.x*blockDim.x;
+  int batchNum = 1;
+  
+  //if( fabs(in[idx]) >= pow(2,7) -1){
+  //  pointers[batchNum]++;
+  //}
+}
+//each batch then finds its starting point
+__global__ void compress_fixed24_8_gpu_scan(fixed_point24_8* in, unsigned len, uint8_t* out, uint32_t batchSize,unsigned* pointers){
+  return;
+}
+
+//compress the data in parallel
+__global__ void compress_fixed24_8_gpu_compres(fixed_point24_8* in, unsigned len, uint8_t* out, uint32_t batchSize,unsigned* pointers){
+  return;
+}
+
+void writeFloats(int num){
+  std::ofstream f("out_floats.csv");
+  f << num << "\n";
+  srand( time(NULL) );
+  for (int idx  = 0; idx < num; idx++){
+      float currRand =  RANDO_MIN + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(RANDO_MAX-RANDO_MIN)));
+      f << currRand << "\n";
+  }
+  f.close();
 }
 
 
 int run(int size, int moder) {
   //Defnies
-	int M_SIZE = pow(2, size);
-	int mode = moder;
+  int M_SIZE = pow(2, size);
+  int mode = moder;
 
 
   /*Allocations and declarations*/
@@ -231,6 +262,8 @@ int run(int size, int moder) {
 
 //0 no compress | 1 compress
 int main(){
+  writeFloats(65536);
+  return;
   
   std::ofstream f("out_comp.csv");
   f <<  " Compressed Kernel,";
