@@ -16,8 +16,10 @@ commands:
     # Use CMake to generate the build files. Remember that your directory gets uploaded to /src
     #- cmake /src
     # Run the make file to compile the project.
+    - mv /src/src/main.cu /src/src/main_namit.cu
+    - mv /src/src/compress_optimized.cu /src/src/main.cu
     - make -C /src
-    - ./ece508-final /src/data/input512.raw
+    - ./ece508-final /src/data/input_10485760_uint8.raw
     #- g++ /src/schemes/longCompress.c -o longCompress
     #- ./longCompress
 
@@ -25,11 +27,32 @@ commands:
     # format supports this using a block-strip command. See
     # http://stackoverflow.com/a/21699210/3543720 for info- >-
     - >-
-      nvprof --cpu-profiling on --export-profile timeline.nvprof --
-      ./ece508-final /src/data/input512.raw
+      nvprof --cpu-profiling on --export-profile timeline_D1.nvprof --
+      ./ece508-final /src/data/input_10485760_uint8.raw
     - >-
-      nvprof --cpu-profiling on --export-profile analysis.nvprof --analysis-metrics --
-      ./ece508-final /src/data/input512.raw
+      nvprof --cpu-profiling on --export-profile analysis_D1.nvprof --analysis-metrics --
+      ./ece508-final /src/data/input_10485760_uint8.raw
+    - rm /src/src/main.cu
+    - mv /src/src/main_Lai.cu /src/src/main.cu
+    - make -C /src
+    - ./ece508-final /src/data/input_10485760_uint8.raw
+    - >-
+      nvprof --cpu-profiling on --export-profile timeline_D2.nvprof --
+      ./ece508-final /src/data/input_10485760_uint8.raw
+    - >-
+      nvprof --cpu-profiling on --export-profile analysis_D2.nvprof --analysis-metrics --
+      ./ece508-final /src/data/input_10485760_uint8.raw
+
+    - rm /src/src/main.cu
+    - mv /src/src/main_namit.cu /src/src/main.cu
+    - make -C /src
+    - ./ece508-final /src/data/input_10485760_uint8.raw
+    - >-
+      nvprof --cpu-profiling on --export-profile timeline_D3.nvprof --
+      ./ece508-final /src/data/input_10485760_uint8.raw
+    - >-
+      nvprof --cpu-profiling on --export-profile analysis_D3.nvprof --analysis-metrics --
+      ./ece508-final /src/data/input_10485760_uint8.raw
 
     #- >-
     #  ./ece508-final -i input1,input2 -o output
