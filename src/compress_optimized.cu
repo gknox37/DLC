@@ -15,7 +15,7 @@
 
 using namespace std;
 
-#define blockSize 128 //This is number of bytes per compression block
+#define blockSize 1024 //This is number of bytes per compression block
 
 //Casts t as int16, int32 or long, then deferences t.
 
@@ -29,10 +29,22 @@ void initArray(int size , int16_t *isCompressed)
     }
 }
 
+long getVals_dec(char * t , int base_size)
+{
+    long a ;
+    if(base_size == 1)
+       a = *((uint8_t*)t) ;
+    else if (base_size ==2)
+       a = *((uint16_t*)t) ;
+    else if (base_size ==4)
+       a = *((uint32_t*)t) ; 
+  return a ;
+ }
+
 long getVals(char * t , int base_size)
 {
    long a ;
-   
+     
       
    if(base_size == 2)
      a = *((int16_t *)t) ; 
@@ -507,7 +519,7 @@ int decompress ( char * compressed , char * decompressed , int bytesCopied , lon
         int j ;
         for (j = 0 ; j < numPtrs ; ++j)
         {
-            long compressed_val = getVals((char *)&compressed[offset_compressed], compressed_size * 8) ;
+            long compressed_val = getVals_dec((char *)&compressed[offset_compressed], compressed_size ) ;
             
             compressed_val += baseVals[i] ;
             if (chunk_size ==2 )
@@ -591,7 +603,14 @@ int main(int argc , char *argv[])
     
     int numBytesBeforeCompress = longArraySize*sizeof(long);
     int numBlocks = ceil(numBytesBeforeCompress/blockSize); //int numBlocks = (((longArraySize * sizeof(long))-1)/blockSize) + 1 ; //ceiling
-    
+    long a ; 
+    const auto start_now = now() ;
+    int a1 ; 
+    for (int i2 = 0 ; i2 < longArraySize ; i++)
+           a1 = inputArray[i2] ; 
+    const auto end_now = now() ;
+    const auto elapsed_now = std::chrono::duration<double, std::milli>(end_now - start_now).count();
+    std::cout << "CPU simple time =  " << elapsed_now<<" milliseconds.\n";
     long baseVals[numBlocks] ;
     int16_t  isCompressed[numBlocks] ;
     char * compressed = (char*) malloc(numBytesBeforeCompress) ; //Compressed table should be big enough as uncompressed data
@@ -606,12 +625,16 @@ int main(int argc , char *argv[])
         printf("Base value , compressed info , Ratio : %lu , %d\n , %f\n", baseVals[i] , isCompressed[i] , compression_ratio) ;
     }*/
     char * decompressed = (char*) malloc(numBytesBeforeCompress) ;
-   /* int bytes = decompress(compressed , decompressed , bytesCopied , baseVals , isCompressed , numBlocks) ;
-    printf("Bytes after decompression : %d\n" , bytes) ;
+    const auto start_dec = now() ;
+    int bytes = decompress(compressed , decompressed , bytesCopied , baseVals , isCompressed , numBlocks) ;
+    const auto end_dec = now() ;
+    const auto elapsed_dec = std::chrono::duration<double, std::milli>(end_dec - start_dec).count();
+    std::cout << "CPU Decompression time =  " << elapsed_dec<<" milliseconds.\n";
+   // printf("Bytes after decompression : %d\n" , bytes) ;
     bool t = (bytes == longArraySize * sizeof(long)) && (strncmp((char*)inputArray , decompressed , bytes) ==0) ;
     if(t)
-        printf("Successful \n") ;
-     */
+        printf("SuccessfulCpu \n") ;
+     
     const auto elapsed = std::chrono::duration<double, std::milli>(end - start).count();
     std::cout << "Compression time =  " << elapsed<<" milliseconds.\n";
     char * devCompressedArray ;
@@ -636,14 +659,14 @@ int main(int argc , char *argv[])
     // Decompress in GPU
     // ----------------------------------------
     dim3 Grid(numBlocks, 1, 1);
-    dim3 Block(blockSize/2, 1, 1);
+    dim3 Block(blockSize, 1, 1);
     const auto start_decompress = now() ;
     decompress_kernel<<<Grid, Block>>>( devDecompressedArray, devCompressedArray , numBlocks , devIsCompressed , devBaseVals);
     cudaDeviceSynchronize();
     const auto end_decompress = now() ;
     const auto elapsed2 = std::chrono::duration<double,std::milli>(end_decompress - start_decompress).count() ;
     std::cout<<"Decompress Kernel time "<<elapsed2 << "milliseconds\n" ;
-    cudaMemcpy(isCompressed , devIsCompressed, numBlocks *sizeof(int16_t) , cudaMemcpyDeviceToHost) ;
+//s    cudaMemcpy(isCompressed , devIsCompressed, numBlocks *sizeof(int16_t) , cudaMemcpyDeviceToHost) ;
     cudaMemcpy(decompressed , devDecompressedArray , longArraySize*sizeof(long) , cudaMemcpyDeviceToHost) ; 
     // get elapsed time in milliseconds
    // elapsed = std::chrono::duration<double, std::milli>(end_decompress - start_decompress).count();
