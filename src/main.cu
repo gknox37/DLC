@@ -16,6 +16,7 @@ using namespace std;
 
 #define Algo_blockSize 512 //16 //This is number of bytes per compression block
 #define SCAN_BLOCK_SIZE 512 //8
+//#define blockSize 1024
 //This is not number of threads in a ThreadBlock
 
 
@@ -202,7 +203,7 @@ __global__ void Finaladd(float *input, float *output, int len){
   }
 }
 
-/*__device__ int  scan_k ( int16_t * isCompressed , int numBlocks)
+/*__device__ int  scan_krishna ( int16_t * isCompressed , int numBlocks)
 {
    // BytesSoFar is the array to perform the scan on
    int idx = blockIdx.x  ;
@@ -306,7 +307,7 @@ __global__ void decompress_n(char* input, long* output, int16_t* devCompressedTa
 }
 
 
-/*__global__ void decompress_kernel_k ( char * decompressed , char * compressed , int numBlocks , int16_t * isCompressed , long * baseVals)
+/*__global__ void decompress_kernel_krishna ( char * decompressed , char * compressed , int numBlocks , int16_t * isCompressed , long * baseVals)
 {
    int idx = blockIdx.x ;
    int tx = threadIdx.x ;
@@ -315,7 +316,7 @@ __global__ void decompress_n(char* input, long* output, int16_t* devCompressedTa
    __shared__ int base_val ;
    if ( idx < numBlocks)
       localVal = isCompressed[idx]  ;
-   int localBaseVal = scan(isCompressed , numBlocks) ;
+   int localBaseVal = scan_krishna(isCompressed , numBlocks) ;
    if ( tx == 0){
       base_val = localBaseVal;
       blockBaseVal = baseVals[idx] ;
@@ -912,7 +913,10 @@ int main(int argc, char **argv) {
     dim3 DecomGrid(x, 1, 1);
     dim3 DecomBlock(1024, 1, 1);
     decompress_n<<<DecomGrid, DecomBlock>>>(devCompressed, devDecompressed, devCompressedTable, devBlockStart, devBaseVals, numElements); //, numElementsperBlock);
-    //decompress_kernel_k<<<Grid, Block>>>( devDecompressed, devCompressed, numBlocks, devIsCompressed, devBaseVals);
+    
+    //dim3 kGrid(numBlocks, 1, 1);
+    //dim3 kBlock(blockSize, 1, 1);
+    //decompress_kernel_krishna<<<kGrid, kBlock>>>( (char*)devDecompressed, devCompressed, numBlocks, devCompressedTable, devBaseVals);
     cudaDeviceSynchronize();
 
 
