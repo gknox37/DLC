@@ -641,12 +641,44 @@ void scan_cpu(int16_t *isCompressed, int32_t *isCompressedMatrix, int numBlocks)
 int main(int argc, char **argv) {
     
     // get start time
-
-  int longArraySize = 800000 ;
-  long testArray[longArraySize] ;
-  int i ,j ;
-  for ( i =0 ; i < longArraySize ; i++)
-     testArray[i] = (1*i)    ; 
+ if (argc !=2 ){
+        cerr << "This program perfoms Compression on CPU and Decompression on GPU\n"
+        << "Load file to compress as input argument\n"
+        << "Sample usage: \n"
+        << argv[0]
+        << " input512.raw\n";
+        return -1;
+    }
+    
+    //--------------LOAD INPUT FILE-----------------
+    //--- 1st row of file has size of input file ---
+    //--- Contents start from 2nd row --------------
+    int i=0;
+    string filename = string(argv[1]);
+    string line;
+    int longArraySize;
+    std::fstream file_in(filename);
+    if (file_in.is_open()) {
+        //while( std::getline (file_in,line))
+        //    ++longArraySize;
+        file_in >> longArraySize;
+    }
+    printf("total lines = %d\n", longArraySize);
+    long * inputArray = new long[longArraySize] ;
+    if (file_in.is_open()) {
+        for( int i =0; i < longArraySize; i++) {
+        //while ( std::getline (file_in,line) ){
+            //inputArray[i] = stol(line);
+            file_in >> inputArray[i];
+         //   printf("val=%lu, %d\n", inputArray[i], i);
+        }
+        file_in.close();
+    }
+    else {
+        cout << "Unable to open file: " << argv[1] << "\n";
+        return -1;
+    }
+    
   int numBlocks = (((longArraySize * sizeof(long))-1)/blockSize) + 1 ; //ceiling 
 
   long baseVals[numBlocks] ;
