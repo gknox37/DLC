@@ -37,57 +37,57 @@ long getVals_dec(char * t , int base_size)
     else if (base_size ==2)
        a = *((uint16_t*)t) ;
     else if (base_size ==4)
-       a = *((uint32_t*)t) ; 
+       a = *((uint32_t*)t) ;
   return a ;
  }
 
 long getVals(char * t , int base_size)
 {
    long a ;
-     
-      
+
+
    if(base_size == 2)
-     a = *((int16_t *)t) ; 
+     a = *((int16_t *)t) ;
    else if(base_size == 4)
      a = *((int32_t*)t) ;
    else
      a = *((long*)t) ;
-   return a ; 
-}  
+   return a ;
+}
 
 __device__ int  scan ( int16_t * isCompressed , int numBlocks)
 {
    // BytesSoFar is the array to perform the scan on
    int idx = blockIdx.x  ;
-   int t_idx = threadIdx.x ; 
+   int t_idx = threadIdx.x ;
    int localVal = 0 ;
-   
+
    if ( idx < numBlocks && t_idx ==0)
    {
      if(isCompressed[idx] > 0) {
       localVal = isCompressed[idx] ; // get the isCompressed value
-      int localChunkSize = localVal/4 ; 
+      int localChunkSize = localVal/4 ;
       if(localChunkSize == 1)
-           localChunkSize = 2 ; 
+           localChunkSize = 2 ;
       else if (localChunkSize == 2)
            localChunkSize = 4;
       else
-           localChunkSize = 8 ; 
-      int localCompSize = localVal % 4 ; 
+           localChunkSize = 8 ;
+      int localCompSize = localVal % 4 ;
      if(localCompSize == 1)
         localCompSize = 1 ;
      else if (localCompSize == 2)
-        localCompSize = 2 ; 
+        localCompSize = 2 ;
     else
-       localCompSize = 4 ; 
-    isCompressed[idx] = (blockSize/localChunkSize) * localCompSize ; 
+       localCompSize = 4 ;
+    isCompressed[idx] = (blockSize/localChunkSize) * localCompSize ;
    }
   else if (isCompressed[idx]  < 0)
     isCompressed[idx] = -1 * isCompressed[idx] ;
   else
-    isCompressed[idx] = blockSize ; 
-   
-  
+    isCompressed[idx] = blockSize ;
+
+
   }
 
  __syncthreads() ;
@@ -99,40 +99,40 @@ __device__ int  scan ( int16_t * isCompressed , int numBlocks)
     int temp ;
     if((idx < numBlocks) && idx >= i && t_idx == 0)
   {
-     localVal += isCompressed[idx - i] ; 
+     localVal += isCompressed[idx - i] ;
      temp = isCompressed[idx] + isCompressed[idx - i] ;
   }
     __syncthreads() ;
-    
-    if((idx < numBlocks) && idx >=i && t_idx ==0)
-       isCompressed[idx] = temp ; 
 
-    __syncthreads() ; 
+    if((idx < numBlocks) && idx >=i && t_idx ==0)
+       isCompressed[idx] = temp ;
+
+    __syncthreads() ;
    i = i*2 ;
  }
 
-  return localVal ; 
+  return localVal ;
 }
 
 __global__ void decompress_kernel ( char * decompressed , char * compressed , int numBlocks , int16_t * isCompressed , long * baseVals , int * positions_array)
 {
    int idx = blockIdx.x ;
-   int t_idx = threadIdx.x ;  
-   int localVal ; 
-   __shared__ long blockBaseVal ; 
-   __shared__ int base_val ; 
+   int t_idx = threadIdx.x ;
+   int localVal ;
+   __shared__ long blockBaseVal ;
+   __shared__ int base_val ;
    if ( idx < numBlocks)
       localVal = isCompressed[idx]  ;
    int localBaseVal = 0 ;
    if(idx < numBlocks)
-   localBaseVal = positions_array[idx] ;     
-   if ( t_idx == 0){ 
+   localBaseVal = positions_array[idx] ;
+   if ( t_idx == 0){
       base_val = localBaseVal;
       blockBaseVal = baseVals[idx] ;
    }
    __syncthreads() ;
-   int i ; 
-   int bytesToDecompress = 1 ; 
+   int i ;
+   int bytesToDecompress = 1 ;
    int localChunkSize , localCompSize ;
    if ( idx < numBlocks)
    {
@@ -142,22 +142,22 @@ __global__ void decompress_kernel ( char * decompressed , char * compressed , in
           if(localChunkSize == 1 )
              localChunkSize = 2 ;
           else if (localChunkSize == 2 )
-             localChunkSize = 4 ; 
-          else 
+             localChunkSize = 4 ;
+          else
              localChunkSize = 8 ;
           localCompSize = localVal % 4 ;
           if(localCompSize == 1)
              localCompSize = 1 ;
           else if (localCompSize == 2)
-              localCompSize = 2 ; 
+              localCompSize = 2 ;
           else
-              localCompSize = 4 ; 
-          bytesToDecompress = (blockSize/localChunkSize)*localCompSize ; 
+              localCompSize = 4 ;
+          bytesToDecompress = (blockSize/localChunkSize)*localCompSize ;
        }
       else if ( localVal ==0 )
         bytesToDecompress = blockSize ;
       else
-        bytesToDecompress = -1*localVal ; 
+        bytesToDecompress = -1*localVal ;
    }
 
    __shared__ char compressed_local[blockSize] ;
@@ -172,9 +172,9 @@ __global__ void decompress_kernel ( char * decompressed , char * compressed , in
 
   __syncthreads() ;
  int baseDecompress = idx * blockSize ;
- int copyGranularity = (localVal<=0) ? 1 : localCompSize ;  
+ int copyGranularity = (localVal<=0) ? 1 : localCompSize ;
 int chunkGranularity = (localVal <=0) ? 1 : localChunkSize ;
- int i1 = baseDecompress ; 
+ int i1 = baseDecompress ;
  if(idx < numBlocks)
  {
     for(i = 0 ; i < bytesToDecompress  ; i+= copyGranularity * blockDim.x , i1 += blockDim.x * chunkGranularity )
@@ -182,24 +182,24 @@ int chunkGranularity = (localVal <=0) ? 1 : localChunkSize ;
         if (i + copyGranularity * t_idx < bytesToDecompress)
         {
            if(localVal<=0)
-              decompressed[i1 +chunkGranularity*t_idx] = compressed_local[i + copyGranularity * t_idx] ; 
+              decompressed[i1 +chunkGranularity*t_idx] = compressed_local[i + copyGranularity * t_idx] ;
            else{
-                       
+
                   if (chunkGranularity == 2)
                   {
                     int16_t a = blockBaseVal ;
-                     
+
                     if(copyGranularity == 1)
                     {
                        uint8_t *a1 = (uint8_t*)&(compressed_local[i + copyGranularity * t_idx]) ;
-                       a = a + *a1 ; 
+                       a = a + *a1 ;
                     }
                    else if (copyGranularity ==2)
                     {
                        uint16_t *a1 = (uint16_t*)&(compressed_local[i + copyGranularity * t_idx]) ;
-                       a = a + *a1 ; 
+                       a = a + *a1 ;
                     }
-                   else  
+                   else
                     {
                        uint32_t *a1 = (uint32_t*)&(compressed_local[i + copyGranularity * t_idx]) ;
                        a = a + *a1 ;
@@ -210,18 +210,18 @@ int chunkGranularity = (localVal <=0) ? 1 : localChunkSize ;
                    if (chunkGranularity == 4)
                   {
                     int32_t a = blockBaseVal ;
-                     
+
                     if(copyGranularity == 1)
                     {
                        uint8_t *a1 = (uint8_t*)&(compressed_local[i + copyGranularity * t_idx]) ;
-                       a = a + *a1 ; 
+                       a = a + *a1 ;
                     }
                    else if (copyGranularity ==2)
                     {
                        uint16_t *a1 = (uint16_t*)&(compressed_local[i + copyGranularity * t_idx]) ;
-                       a = a + *a1 ; 
+                       a = a + *a1 ;
                     }
-                   else  
+                   else
                     {
                        uint32_t *a1 = (uint32_t*)&(compressed_local[i + copyGranularity * t_idx]) ;
                        a = a + *a1 ;
@@ -231,18 +231,18 @@ int chunkGranularity = (localVal <=0) ? 1 : localChunkSize ;
                    if (chunkGranularity == 8)
                   {
                     long a = blockBaseVal ;
-                     
+
                     if(copyGranularity == 1)
                     {
                        uint8_t *a1 = (uint8_t*)&(compressed_local[i + copyGranularity * t_idx]) ;
-                       a = a + *a1 ; 
+                       a = a + *a1 ;
                     }
                    else if (copyGranularity ==2)
                     {
                        uint16_t *a1 = (uint16_t*)&(compressed_local[i + copyGranularity * t_idx]) ;
-                       a = a + *a1 ; 
+                       a = a + *a1 ;
                     }
-                   else  
+                   else
                     {
                        uint32_t *a1 = (uint32_t*)&(compressed_local[i + copyGranularity * t_idx]) ;
                        a = a + *a1 ;
@@ -253,14 +253,14 @@ int chunkGranularity = (localVal <=0) ? 1 : localChunkSize ;
            }
       }
    }
-                 
+
   __syncthreads() ;
-}             
-   
+}
+
 
 int bdCompress(char* input, int len, char * compressed,  int16_t * isCompressed, long * baseVals , int * positions_array)
 {
-    
+
     int bytesCopied = 0 ;
     int blkCounter = 0 ;
     int numBlocks = ceil(len/blockSize); //int numBlocks = ((len - 1/blockSize)) + 1 ; // ceiling
@@ -269,7 +269,7 @@ int bdCompress(char* input, int len, char * compressed,  int16_t * isCompressed,
     int size_array[3] ;
     size_array[0] = 16 ; size_array[1] = 32 ; size_array[2] = 64 ;
     int offset = 0 ;
-    
+
     // long *ptrArray[numPtrs] ;
     if ( offset + blockSize > len)
     {
@@ -280,11 +280,11 @@ int bdCompress(char* input, int len, char * compressed,  int16_t * isCompressed,
         bytesCopied += len - offset ;
         return bytesCopied ;
     }
-    
-    
+
+
     while(offset + blockSize <= len) // Don't want to compress if length remaining is less than block
     {
-        
+
         // Assume each value is 4 bytes , long , can try to vary this later.
         // Try to compress it to unsigned int_8 (0-255)
         // Get the minimum value as base so unsigned int 8 can be used for deltas
@@ -302,7 +302,7 @@ int bdCompress(char* input, int len, char * compressed,  int16_t * isCompressed,
             int numPtrs =  (blockSize*8)/(size_array[size_index]) ; //this is number of elements in block that will be compressed
             long ptrArray [numPtrs] ;
             char local_storage[blockSize] ;
-            
+
             for ( i = 0 ; i < numPtrs ; i++)
             {
                 ptrArray[i] = getVals((char*)&input[offset + i*(base_size/8)] , (base_size/8)) ; //get input as int16, int32 or long
@@ -324,7 +324,7 @@ int bdCompress(char* input, int len, char * compressed,  int16_t * isCompressed,
                         minValue = ptrArray[i] ;
                 }
             }
-            
+
             long range = 0 ;
             flag = false ;
             for (i =0 ; i<numPtrs ; i++)
@@ -407,7 +407,7 @@ int bdCompress(char* input, int len, char * compressed,  int16_t * isCompressed,
             int div_off , compressed_off ;
             for (i =0 ; i < numPtrs ; i++)
             {
-                
+
                 ptrArray[i] = getVals(&input[offset + (i*minDivision/8)] , (minDivision/8))  ;
                 div_off = 3 ;
                 if ( minDivision == 16)         //Was unit16 BEFORE compression
@@ -420,7 +420,7 @@ int bdCompress(char* input, int len, char * compressed,  int16_t * isCompressed,
                     //  ptrArray[i] = (int32_t*) (&input[offset + i*minDivision]) ;
                     div_off = 2 ;
                 }
-                
+
                 if ( minCompressed == 32)       //is uint32 AFTER compression
                 {
                     uint32_t a  = ptrArray[i] - minVal ;
@@ -440,8 +440,8 @@ int bdCompress(char* input, int len, char * compressed,  int16_t * isCompressed,
                     compressed_off = 1 ;
                 }
                 bytesCopied += (minCompressed/8) ;
-                
-                
+
+
             }
             //isCompressed is 5 if uint16 was compressed into uint8
             //                6 if uint16 was compressed into uint16
@@ -453,14 +453,14 @@ int bdCompress(char* input, int len, char * compressed,  int16_t * isCompressed,
             //               14 if long was compressed into uint16
             //               15 if long was compressed into uint32
             isCompressed[blkCounter] = 4*div_off + compressed_off ;
-            positions_array[blkCounter + 1] = positions_array[blkCounter] + ((blockSize*8)/minDivision)*(minCompressed/8) ; 
+            positions_array[blkCounter + 1] = positions_array[blkCounter] + ((blockSize*8)/minDivision)*(minCompressed/8) ;
             baseVals[blkCounter] = minVal ;
         }
         else
         {
             baseVals[blkCounter] = minVal ;
            isCompressed[blkCounter] = 0 ;
-            positions_array[blkCounter + 1] = positions_array[blkCounter] + blockSize ; 
+            positions_array[blkCounter + 1] = positions_array[blkCounter] + blockSize ;
             memcpy(&compressed[bytesCopied] , &input[offset] , blockSize) ;
             bytesCopied += blockSize ;
         }
@@ -469,18 +469,18 @@ int bdCompress(char* input, int len, char * compressed,  int16_t * isCompressed,
         if ( offset + blockSize > len)
         {
             baseVals[blkCounter] = 0 ;
-            
+
             isCompressed[blkCounter] = offset - len ;
             positions_array[blkCounter + 1]  = positions_array[blkCounter] + (len - offset) ;
             memcpy(&compressed[bytesCopied] , &input[offset] , len - offset) ;
             bytesCopied += len - offset ;
             break ;
         }
-        
+
     }
-    
+
     return bytesCopied ;
-    
+
 }
 
 int decompress ( char * compressed , char * decompressed , int bytesCopied , long *baseVals , int16_t *isCompressed , int numBlocks)
@@ -497,7 +497,7 @@ int decompress ( char * compressed , char * decompressed , int bytesCopied , lon
             offset_decompressed += blockSize ;
             continue ;
         }
-        
+
         if (isCompressed[i] <0)
         {
             int bytes_to_copy = -1* isCompressed[i] ;
@@ -506,7 +506,7 @@ int decompress ( char * compressed , char * decompressed , int bytesCopied , lon
             offset_decompressed += bytes_to_copy ;
             break ;
         }
-        
+
         // If code reaches this point then actual compression has taken place
         int chunk_size ;
         int compressed_size ;
@@ -522,13 +522,13 @@ int decompress ( char * compressed , char * decompressed , int bytesCopied , lon
             compressed_size = 2 ;
         else
             compressed_size = 4 ;
-        
+
         int numPtrs = blockSize/chunk_size ;
         int j ;
         for (j = 0 ; j < numPtrs ; ++j)
         {
             long compressed_val = getVals_dec((char *)&compressed[offset_compressed], compressed_size ) ;
-            
+
             compressed_val += baseVals[i] ;
             if (chunk_size ==2 )
             {
@@ -549,7 +549,7 @@ int decompress ( char * compressed , char * decompressed , int bytesCopied , lon
             offset_decompressed += chunk_size ;
         }
     }
-    
+
     return offset_decompressed ;
 }
 
@@ -566,7 +566,7 @@ int main(int argc , char *argv[])
         << " input512.raw\n";
         return -1;
     }
-    
+
     //--------------LOAD INPUT FILE-----------------
     //--- 1st row of file has size of input file ---
     //--- Contents start from 2nd row --------------
@@ -584,6 +584,7 @@ int main(int argc , char *argv[])
     long * inputArray = new long[longArraySize] ;
     if (file_in.is_open()) {
         for( int i =0; i < longArraySize; i++) {
+          //printf("%d\n",i);
         //while ( std::getline (file_in,line) ){
             //inputArray[i] = stol(line);
             file_in >> inputArray[i];
@@ -595,7 +596,7 @@ int main(int argc , char *argv[])
         cout << "Unable to open file: " << argv[1] << "\n";
         return -1;
     }
-    
+
     //int longArraySize = 512;
     /*int i;
     ofstream file_out;
@@ -608,14 +609,14 @@ int main(int argc , char *argv[])
     }
     file_out.close(); */
     //-----------------Input LOADED -------------
-    
+
     int numBytesBeforeCompress = longArraySize*sizeof(long);
     int numBlocks = ceil(numBytesBeforeCompress/blockSize); //int numBlocks = (((longArraySize * sizeof(long))-1)/blockSize) + 1 ; //ceiling
-    long a ; 
+    long a ;
     const auto start_now = now() ;
-    int a1 ; 
+    int a1 ;
     for (int i2 = 0 ; i2 < longArraySize ; i++)
-           a1 = inputArray[i2] ; 
+           a1 = inputArray[i2] ;
     const auto end_now = now() ;
     const auto elapsed_now = std::chrono::duration<double, std::milli>(end_now - start_now).count();
     std::cout << "CPU simple time =  " << elapsed_now<<" milliseconds.\n";
@@ -644,30 +645,30 @@ int main(int argc , char *argv[])
     bool t = (bytes == longArraySize * sizeof(long)) && (strncmp((char*)inputArray , decompressed , bytes) ==0) ;
     if(t)
         printf("SuccessfulCpu \n") ;
-     
+
     const auto elapsed = std::chrono::duration<double, std::milli>(end - start).count();
     std::cout << "Compression time =  " << elapsed<<" milliseconds.\n";
     char * devCompressedArray ;
-    char * devDecompressedArray ;  
+    char * devDecompressedArray ;
     int16_t* devIsCompressed ;
     long * devBaseVals ;
      int * dev_positions_array ;
     cudaMalloc(&devCompressedArray, bytesCopied);
     cudaMalloc(&devDecompressedArray , longArraySize * sizeof(long));
-    cudaMalloc(&devIsCompressed , numBlocks * sizeof(int16_t)) ; 
+    cudaMalloc(&devIsCompressed , numBlocks * sizeof(int16_t)) ;
     cudaMalloc(&devBaseVals , numBlocks*sizeof(long)) ;
     cudaMalloc(&dev_positions_array , (numBlocks + 1)*sizeof(int)) ;
-       
-    const auto transferCPU_GPU_begin = now(); 
+
+    const auto transferCPU_GPU_begin = now();
     cudaMemcpy(devCompressedArray, compressed , bytesCopied, cudaMemcpyHostToDevice);
-    cudaMemcpy(devIsCompressed , isCompressed , numBlocks * sizeof(int16_t) , cudaMemcpyHostToDevice) ; 
+    cudaMemcpy(devIsCompressed , isCompressed , numBlocks * sizeof(int16_t) , cudaMemcpyHostToDevice) ;
     cudaMemcpy(devBaseVals , baseVals , numBlocks * sizeof(long) , cudaMemcpyHostToDevice) ;
-    cudaMemcpy(dev_positions_array , positions_array , (numBlocks + 1)*sizeof(int) , cudaMemcpyHostToDevice) ;  
+    cudaMemcpy(dev_positions_array , positions_array , (numBlocks + 1)*sizeof(int) , cudaMemcpyHostToDevice) ;
     const auto transferCPU_GPU_end = now();
     // get elapsed time in milliseconds
      const auto elapsed1 = std::chrono::duration<double, std::milli>(transferCPU_GPU_end - transferCPU_GPU_begin).count();
      std::cout << "Transfer CPU to GPU time =  " << elapsed1 << " milliseconds.\n";
-    
+
     // Decompress in GPU
     // ----------------------------------------
     dim3 Grid(numBlocks, 1, 1);
@@ -679,14 +680,14 @@ int main(int argc , char *argv[])
     const auto elapsed2 = std::chrono::duration<double,std::milli>(end_decompress - start_decompress).count() ;
     std::cout<<"Decompress Kernel time "<<elapsed2 << "milliseconds\n" ;
 //s    cudaMemcpy(isCompressed , devIsCompressed, numBlocks *sizeof(int16_t) , cudaMemcpyDeviceToHost) ;
-    cudaMemcpy(decompressed , devDecompressedArray , longArraySize*sizeof(long) , cudaMemcpyDeviceToHost) ; 
+    cudaMemcpy(decompressed , devDecompressedArray , longArraySize*sizeof(long) , cudaMemcpyDeviceToHost) ;
     // get elapsed time in milliseconds
    // elapsed = std::chrono::duration<double, std::milli>(end_decompress - start_decompress).count();
    // std::cout << "De-Compression in GPU time = " << elapsed << " milliseconds.";
-     delete[] compressed ;    
+     delete[] compressed ;
     // Free Device Memory
     // ----------------------------------------
- /*   
+ /*
      for ( i = 0 ; i< numBlocks ; i++)
          printf("IsCompressed:%d\n" , (int)isCompressed[i] ) ;
     long * l_array = (long*)&decompressed[0] ;
@@ -695,14 +696,13 @@ int main(int argc , char *argv[])
       printf("Dec:%ld\n" , l_array[i]) ;
     }
 */
-    int k = strncmp((char*)inputArray , decompressed , numBytesBeforeCompress) ; 
-    if(k==0) cout<<"SUCCESSFUL\n" ; 
+    int k = strncmp((char*)inputArray , decompressed , numBytesBeforeCompress) ;
+    if(k==0) cout<<"SUCCESSFUL\n" ;
     cudaFree(devCompressedArray);
     cudaFree(devDecompressedArray);
     cudaFree(devIsCompressed) ;
     cudaFree(devBaseVals) ;
-    delete[] decompressed ; 
-    delete[] inputArray ; 
+    delete[] decompressed ;
+    delete[] inputArray ;
     return 0;
 }
-

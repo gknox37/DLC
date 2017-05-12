@@ -53,6 +53,17 @@ commands:
     - >-
       nvprof --cpu-profiling on --export-profile analysis_D3.nvprof --analysis-metrics --
       ./ece508-final /src/data/input_10485760_uint8.raw
+    - rm src/src/main.cu
+    - mv /src/src/compress_reduced.cu /src/src/main.cu
+    - make -C /src
+    - ./ece508-final /src/data/input_10485760_uint8.raw
+    - >-
+      nvprof --cpu-profiling on --export-profile timeline_D1.2.nvprof --
+      ./ece508-final /src/data/input_10485760_uint8.raw
+    - >-
+      nvprof --cpu-profiling on --export-profile analysis_D1.2.nvprof --analysis-metrics --
+      ./ece508-final /src/data/input_10485760_uint8.raw
+
 
     #- >-
     #  ./ece508-final -i input1,input2 -o output
