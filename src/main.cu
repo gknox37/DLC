@@ -245,6 +245,7 @@ __global__ void decompress_kernel_lai  ( char * decompressed , char * compressed
 {
 
     int tx = blockDim.x*blockIdx.x + threadIdx.x;
+    int bitsABtyes = 8;
     //using thread coarsening to optimize the code
     if(tx < numBlocks)
     {
@@ -254,15 +255,15 @@ __global__ void decompress_kernel_lai  ( char * decompressed , char * compressed
         int offset_compressed = isCompressedMatrix[tx];
         int offset_decompressed = tx*blockSize;
 
-        if (offset == 32 || ((tx+1) == numBlocks && (offset == 32 ))){
+        if (offset == blockSize || ((tx+1) == numBlocks )){
             memcpy(&decompressed[offset_decompressed] , &compressed[offset_compressed] , offset);
             return;
         }
 
         // If code reaches this point then actual compression has taken place
         // assume is long array. numLongABlock is # long data in a block
-        int numLongABlock = 32/8;
-        int chunk_size = 8;
+        int numLongABlock = blockSize/bitsABtyes;
+        int chunk_size = bitsABtyes;
 
         int compressed_size = offset/numLongABlock;
         int numPtrs = blockSize/chunk_size ;
@@ -744,11 +745,12 @@ int main(int argc, char **argv) {
 
     // Decompress in GPU
     // ----------------------------------------
-    dim3 Grid(numBlocks, 1, 1);
-    dim3 Block(blockSize/2, 1, 1);
+    //dim3 Grid(numBlocks, 1, 1);
+    //dim3 Block(blockSize/2, 1, 1);
 
-    dim3 Grid2(ceil((float)numBlocks/1024), 1, 1);
-    dim3 Block2(1024, 1, 1);
+    //change #1
+    dim3 Grid(ceil((float)numBlocks/1024), 1, 1);
+    dim3 Block(1024, 1, 1);
     printf("here");
     const auto start_decompress = now() ;
     //decompress_kernel<<<Grid, Block>>>( devDecompressedArray, devCompressedArray , numBlocks , devIsCompressed , devBaseVals);
