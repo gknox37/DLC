@@ -1,0 +1,1493 @@
+Last login: Fri May 12 23:40:20 on ttys000
+wirelessprv-10-193-110-221:~ namg$ pwd
+/Users/namg
+wirelessprv-10-193-110-221:~ namg$ cd ECE508/DLC/
+wirelessprv-10-193-110-221:DLC namg$ ls
+Makefile			input_random.py
+Profiler_results		nvvp
+README.md			rai_build.yml
+data				rai_linuxAMD64
+designDoc.txt			rai_macAMD64
+examples			schemes
+input_file.py			src
+input_file_hardcoded_uint8.py
+wirelessprv-10-193-110-221:DLC namg$ ./rai_macAMD64
+✱ Checking your athentication credentials.
+✱ Preparing your project directory for upload.
+✱ Uploading your project directory. This may take a few minutes.
+14.61 MiB / 14.61 MiB  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  100.00% 1.84 MiB/s 7s
+✱ Folder uploaded. Server is now processing your submission.
+✱ Your job request has been posted to the queue.
+✱ Server has accepted your job submission and started to configure the container.
+✱ Downloading your code.
+✱ Using webgpu/cuda:ppc64le-8.0-devel as container image.
+✱ Starting container.
+✱ Running echo "Building project"
+Building project
+✱ Running mv /src/src/main.cu /src/src/main_namit.cu
+✱ Running mv /src/src/compress_optimized.cu /src/src/main.cu
+✱ Running ls /src/src/
+compress_optimized	main_D4.cu	     main_namit.cu	      utils.hpp
+compress_optimized.cpp	main_Lai.cu	     main_not_working.cu
+compress_reduced.cu	main_beforeApr29.cu  main_oldKrishna_file.cu
+main.cu			main_from_lab.cu     range.hpp
+✱ Running make -C /src
+make: Entering directory '/src'
+/usr/local/cuda/bin/nvcc  -I src/src src/main.cu -o /build/ece508-final -O3 -std=c++11 -arch=sm_35 -ccbin g++-4.9
+src/main.cu(289): warning: variable "local_storage" was declared but never referenced
+src/main.cu(553): warning: variable "i" was declared but never referenced
+src/main.cu(289): warning: variable "local_storage" was declared but never referenced
+src/main.cu(553): warning: variable "i" was declared but never referenced
+make: Leaving directory '/src'
+✱ Running ./ece508-final /src/data/input_131072_unit8.raw
+total lines = 131072
+Length , Bytes copied  : 1048576 , 131072
+Compression time =  4.09332 milliseconds.
+Transfer CPU to GPU time =  0.104041 milliseconds.
+Decompress Kernel time 0.222574milliseconds
+SUCCESSFUL
+✱ Running nvprof --cpu-profiling on --export-profile timeline_D1.nvprof -- ./ece508-final /src/data/input_131072_unit8.raw
+total lines = 131072
+Length , Bytes copied  : 1048576 , 131072
+Compression time =  3.74014 milliseconds.
+==108== NVPROF is profiling process 108, command: ./ece508-final /src/data/input_131072_unit8.raw
+Transfer CPU to GPU time =  0.10581 milliseconds.
+Decompress Kernel time 0.237841milliseconds
+SUCCESSFUL
+==108== Generated result file: /build/timeline_D1.nvprof
+✱ Running nvprof --cpu-profiling on --export-profile analysis_D1.nvprof --analysis-metrics -- ./ece508-final /src/data/input_131072_unit8.raw
+======== Warning: Metric "l1_shared_utilization" cannot be found on device 0.
+======== Warning: Metric "l1_shared_utilization" cannot be found on device 1.
+======== Warning: Metric "l1_shared_utilization" cannot be found on device 2.
+======== Warning: Metric "l1_shared_utilization" cannot be found on device 3.
+======== Warning: Metric "alu_fu_utilization" cannot be found on device 0.
+======== Warning: Metric "alu_fu_utilization" cannot be found on device 1.
+======== Warning: Metric "alu_fu_utilization" cannot be found on device 2.
+======== Warning: Metric "alu_fu_utilization" cannot be found on device 3.
+======== Warning: Metric "ecc_throughput" cannot be found on device 0.
+======== Warning: Metric "ecc_throughput" cannot be found on device 1.
+======== Warning: Metric "ecc_throughput" cannot be found on device 2.
+======== Warning: Metric "ecc_throughput" cannot be found on device 3.
+======== Warning: Metric "ecc_transactions" cannot be found on device 0.
+======== Warning: Metric "ecc_transactions" cannot be found on device 1.
+======== Warning: Metric "ecc_transactions" cannot be found on device 2.
+======== Warning: Metric "ecc_transactions" cannot be found on device 3.
+======== Warning: Metric "l2_l1_read_transactions" cannot be found on device 0.
+======== Warning: Metric "l2_l1_read_transactions" cannot be found on device 1.
+======== Warning: Metric "l2_l1_read_transactions" cannot be found on device 2.
+======== Warning: Metric "l2_l1_read_transactions" cannot be found on device 3.
+======== Warning: Metric "l2_l1_write_transactions" cannot be found on device 0.
+======== Warning: Metric "l2_l1_write_transactions" cannot be found on device 1.
+======== Warning: Metric "l2_l1_write_transactions" cannot be found on device 2.
+======== Warning: Metric "l2_l1_write_transactions" cannot be found on device 3.
+======== Warning: Metric "nc_l2_read_transactions" cannot be found on device 0.
+======== Warning: Metric "nc_l2_read_transactions" cannot be found on device 1.
+======== Warning: Metric "nc_l2_read_transactions" cannot be found on device 2.
+======== Warning: Metric "nc_l2_read_transactions" cannot be found on device 3.
+======== Warning: Metric "l2_l1_read_throughput" cannot be found on device 0.
+======== Warning: Metric "l2_l1_read_throughput" cannot be found on device 1.
+======== Warning: Metric "l2_l1_read_throughput" cannot be found on device 2.
+======== Warning: Metric "l2_l1_read_throughput" cannot be found on device 3.
+======== Warning: Metric "l2_l1_write_throughput" cannot be found on device 0.
+======== Warning: Metric "l2_l1_write_throughput" cannot be found on device 1.
+======== Warning: Metric "l2_l1_write_throughput" cannot be found on device 2.
+======== Warning: Metric "l2_l1_write_throughput" cannot be found on device 3.
+======== Warning: Metric "nc_l2_read_throughput" cannot be found on device 0.
+======== Warning: Metric "nc_l2_read_throughput" cannot be found on device 1.
+======== Warning: Metric "nc_l2_read_throughput" cannot be found on device 2.
+======== Warning: Metric "nc_l2_read_throughput" cannot be found on device 3.
+======== Warning: Metric "atomic_throughput" cannot be found on device 0.
+======== Warning: Metric "atomic_throughput" cannot be found on device 1.
+======== Warning: Metric "atomic_throughput" cannot be found on device 2.
+======== Warning: Metric "atomic_throughput" cannot be found on device 3.
+total lines = 131072
+Length , Bytes copied  : 1048576 , 131072
+Compression time =  3.70965 milliseconds.
+==126== NVPROF is profiling process 126, command: ./ece508-final /src/data/input_131072_unit8.raw
+Transfer CPU to GPU time =  0.06924 milliseconds.
+==126== Some kernel(s) will be replayed on device 0 in order to collect all events/metrics.
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (0 of 36)...
+==126== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*)" (done)
+Decompress Kernel time 1201.06milliseconds
+SUCCESSFUL
+==126== Generated result file: /build/analysis_D1.nvprof
+✱ Running rm /src/src/main.cu
+✱ Running rm ece508-final
+✱ Running mv /src/src/main_Lai.cu /src/src/main.cu
+✱ Running make -C /src
+make: Entering directory '/src'
+/usr/local/cuda/bin/nvcc  -I src/src src/main.cu -o /build/ece508-final -O3 -std=c++11 -arch=sm_35 -ccbin g++-4.9
+src/main.cu(319): warning: variable "i" is used before its value is set
+src/main.cu(310): warning: variable "numBlocks" was declared but never referenced
+
+src/main.cu(701): warning: variable "compression_ratio" was declared but never referenced
+src/main.cu(319): warning: variable "i" is used before its value is set
+src/main.cu(310): warning: variable "numBlocks" was declared but never referenced
+
+src/main.cu(701): warning: variable "compression_ratio" was declared but never referenced
+make: Leaving directory '/src'
+✱ Running ./ece508-final /src/data/input_131072_unit8.raw
+total lines = 131072
+Compression time = 2.88926 milliseconds.scan time = 0.005707 milliseconds.hereMISMATCH at index 1047553, Input= Decompress=d
+MISMATCH at index 1047554, Input= Decompress=?
+MISMATCH at index 1047555, Input= Decompress=,
+MISMATCH at index 1047556, Input= Decompress=?
+MISMATCH at index 1047557, Input= Decompress=?
+MISMATCH at index 1047558, Input= Decompress=X
+MISMATCH at index 1047559, Input= Decompress=?
+MISMATCH at index 1047560, Input=d Decompress=
+MISMATCH at index 1047561, Input= Decompress=?
+MISMATCH at index 1047562, Input= Decompress=?
+MISMATCH at index 1047563, Input= Decompress=L
+MISMATCH at index 1047564, Input= Decompress=?
+MISMATCH at index 1047565, Input= Decompress=
+MISMATCH at index 1047566, Input= Decompress=x
+MISMATCH at index 1047567, Input= Decompress=?
+MISMATCH at index 1047568, Input=? Decompress=@
+MISMATCH at index 1047569, Input= Decompress=?
+MISMATCH at index 1047570, Input= Decompress=
+MISMATCH at index 1047571, Input= Decompress=l
+MISMATCH at index 1047572, Input= Decompress=?
+MISMATCH at index 1047573, Input= Decompress=4
+MISMATCH at index 1047574, Input= Decompress=?
+MISMATCH at index 1047575, Input= Decompress=?
+MISMATCH at index 1047576, Input=, Decompress=`
+MISMATCH at index 1047577, Input= Decompress=?
+MISMATCH at index 1047578, Input= Decompress=(
+MISMATCH at index 1047579, Input= Decompress=?
+MISMATCH at index 1047580, Input= Decompress=?
+MISMATCH at index 1047581, Input= Decompress=T
+MISMATCH at index 1047582, Input= Decompress=?
+MISMATCH at index 1047584, Input=? Decompress=d
+MISMATCH at index 1047585, Input= Decompress=?
+MISMATCH at index 1047586, Input= Decompress=,
+MISMATCH at index 1047587, Input= Decompress=?
+MISMATCH at index 1047588, Input= Decompress=?
+MISMATCH at index 1047589, Input= Decompress=X
+MISMATCH at index 1047590, Input= Decompress=?
+MISMATCH at index 1047591, Input= Decompress=
+MISMATCH at index 1047592, Input=? Decompress=?
+MISMATCH at index 1047593, Input= Decompress=?
+MISMATCH at index 1047594, Input= Decompress=L
+MISMATCH at index 1047595, Input= Decompress=?
+MISMATCH at index 1047596, Input= Decompress=
+MISMATCH at index 1047597, Input= Decompress=x
+MISMATCH at index 1047598, Input= Decompress=?
+MISMATCH at index 1047599, Input= Decompress=@
+MISMATCH at index 1047600, Input=X Decompress=?
+MISMATCH at index 1047601, Input= Decompress=
+MISMATCH at index 1047602, Input= Decompress=l
+MISMATCH at index 1047603, Input= Decompress=?
+MISMATCH at index 1047604, Input= Decompress=4
+MISMATCH at index 1047605, Input= Decompress=?
+MISMATCH at index 1047606, Input= Decompress=?
+MISMATCH at index 1047607, Input= Decompress=`
+MISMATCH at index 1047608, Input=? Decompress=?
+MISMATCH at index 1047609, Input= Decompress=
+MISMATCH at index 1047610, Input= Decompress=
+MISMATCH at index 1047611, Input= Decompress=
+MISMATCH at index 1047612, Input= Decompress="
+MISMATCH at index 1047613, Input= Decompress=,
+MISMATCH at index 1047615, Input= Decompress=
+
+MISMATCH at index 1047616, Input=  Decompress=
+MISMATCH at index 1047617, Input= Decompress=
+MISMATCH at index 1047618, Input= Decompress=(
+MISMATCH at index 1047619, Input= Decompress=2
+MISMATCH at index 1047620, Input= Decompress=<
+MISMATCH at index 1047621, Input= Decompress=F
+MISMATCH at index 1047622, Input= Decompress=P
+MISMATCH at index 1047623, Input= Decompress=Z
+MISMATCH at index 1047624, Input=? Decompress=d
+MISMATCH at index 1047625, Input= Decompress=n
+MISMATCH at index 1047626, Input= Decompress=x
+MISMATCH at index 1047627, Input= Decompress=?
+MISMATCH at index 1047628, Input= Decompress=?
+MISMATCH at index 1047629, Input= Decompress=?
+MISMATCH at index 1047630, Input= Decompress=?
+MISMATCH at index 1047631, Input= Decompress=?
+MISMATCH at index 1047632, Input=? Decompress=?
+MISMATCH at index 1047633, Input= Decompress=?
+MISMATCH at index 1047634, Input= Decompress=?
+MISMATCH at index 1047635, Input= Decompress=?
+MISMATCH at index 1047636, Input= Decompress=?
+MISMATCH at index 1047637, Input= Decompress=?
+MISMATCH at index 1047638, Input= Decompress=?
+MISMATCH at index 1047639, Input= Decompress=?
+MISMATCH at index 1047640, Input=L Decompress=
+MISMATCH at index 1047641, Input= Decompress=
+MISMATCH at index 1047642, Input= Decompress=
+MISMATCH at index 1047643, Input= Decompress="
+MISMATCH at index 1047644, Input= Decompress=,
+MISMATCH at index 1047646, Input= Decompress=
+
+MISMATCH at index 1047647, Input= Decompress=
+MISMATCH at index 1047648, Input=? Decompress=
+MISMATCH at index 1047649, Input= Decompress=(
+MISMATCH at index 1047650, Input= Decompress=2
+MISMATCH at index 1047651, Input= Decompress=<
+MISMATCH at index 1047652, Input= Decompress=F
+MISMATCH at index 1047653, Input= Decompress=P
+MISMATCH at index 1047654, Input= Decompress=Z
+MISMATCH at index 1047655, Input= Decompress=d
+MISMATCH at index 1047656, Input= Decompress=n
+MISMATCH at index 1047657, Input= Decompress=x
+MISMATCH at index 1047658, Input= Decompress=?
+MISMATCH at index 1047659, Input= Decompress=?
+MISMATCH at index 1047660, Input= Decompress=?
+MISMATCH at index 1047661, Input= Decompress=?
+MISMATCH at index 1047662, Input= Decompress=?
+MISMATCH at index 1047663, Input= Decompress=?
+MISMATCH at index 1047664, Input=x Decompress=?
+MISMATCH at index 1047665, Input= Decompress=?
+MISMATCH at index 1047666, Input= Decompress=?
+MISMATCH at index 1047667, Input= Decompress=?
+MISMATCH at index 1047668, Input= Decompress=?
+MISMATCH at index 1047669, Input= Decompress=?
+MISMATCH at index 1047670, Input= Decompress=?
+MISMATCH at index 1047671, Input= Decompress=
+MISMATCH at index 1047672, Input=? Decompress=
+MISMATCH at index 1047673, Input= Decompress=
+MISMATCH at index 1047674, Input= Decompress="
+MISMATCH at index 1047675, Input= Decompress=,
+MISMATCH at index 1047677, Input= Decompress=
+
+MISMATCH at index 1047678, Input= Decompress=
+MISMATCH at index 1047679, Input= Decompress=
+MISMATCH at index 1047680, Input=@ Decompress=
+MISMATCH at index 1047688, Input=? Decompress=
+MISMATCH at index 1047696, Input Decompress=
+MISMATCH at index 1047704, Input=l Decompress=
+MISMATCH at index 1047712, Input=? Decompress=
+MISMATCH at index 1047720, Input=4 Decompress=
+MISMATCH at index 1047728, Input=? Decompress=
+MISMATCH at index 1047736, Input=? Decompress=
+MISMATCH at index 1047744, Input=` Decompress=
+MISMATCH at index 1047752, Input=? Decompress=
+MISMATCH at index 1047760, Input=( Decompress=
+MISMATCH at index 1047768, Input=? Decompress=
+MISMATCH at index 1047776, Input=? Decompress=
+MISMATCH at index 1047784, Input=T Decompress=
+MISMATCH at index 1047792, Input=? Decompress=
+MISMATCH at index 1047808, Input=d Decompress=
+MISMATCH at index 1047816, Input=? Decompress=
+MISMATCH at index 1047824, Input=, Decompress=
+MISMATCH at index 1047832, Input=? Decompress=
+MISMATCH at index 1047840, Input=? Decompress=
+MISMATCH at index 1047848, Input=X Decompress=
+MISMATCH at index 1047856, Input=? Decompress=
+MISMATCH at index 1047864, Input=  Decompress=
+MISMATCH at index 1047872, Input=? Decompress=
+MISMATCH at index 1047880, Input=? Decompress=
+MISMATCH at index 1047888, Input=L Decompress=
+MISMATCH at index 1047896, Input=? Decompress=
+MISMATCH at index 1047904, Input= Decompress=
+MISMATCH at index 1047912, Input=x Decompress=
+MISMATCH at index 1047920, Input=? Decompress=
+MISMATCH at index 1047928, Input=@ Decompress=
+MISMATCH at index 1047936, Input=? Decompress=
+MISMATCH at index 1047944, Input Decompress=
+MISMATCH at index 1047952, Input=l Decompress=
+MISMATCH at index 1047960, Input=? Decompress=
+MISMATCH at index 1047968, Input=4 Decompress=
+MISMATCH at index 1047976, Input=? Decompress=
+MISMATCH at index 1047984, Input=? Decompress=
+MISMATCH at index 1047992, Input=` Decompress=
+MISMATCH at index 1048000, Input=? Decompress=
+MISMATCH at index 1048008, Input= Decompress=
+MISMATCH at index 1048016, Input= Decompress=
+MISMATCH at index 1048024,
+Input= Decompress=
+MISMATCH at index 1048032, Input=" Decompress=
+MISMATCH at index 1048040, Input=, Decompress=
+MISMATCH at index 1048056, Input=
+Decompress=
+MISMATCH at index 1048064, Input= Decompress=
+MISMATCH at index 1048072, Input= Decompress=
+MISMATCH at index 1048080, Input=( Decompress=
+MISMATCH at index 1048088, Input=2 Decompress=
+MISMATCH at index 1048096, Input=< Decompress=
+MISMATCH at index 1048104, Input=F Decompress=
+MISMATCH at index 1048112, Input=P Decompress=
+MISMATCH at index 1048120, Input=Z Decompress=
+MISMATCH at index 1048128, Input=d Decompress=
+MISMATCH at index 1048136, Input=n Decompress=
+MISMATCH at index 1048144, Input=x Decompress=
+MISMATCH at index 1048152, Input=? Decompress=
+MISMATCH at index 1048160, Input=? Decompress=
+MISMATCH at index 1048168, Input=? Decompress=
+MISMATCH at index 1048176, Input=? Decompress=
+MISMATCH at index 1048184, Input=? Decompress=
+MISMATCH at index 1048192, Input=? Decompress=
+MISMATCH at index 1048200, Input=? Decompress=
+MISMATCH at index 1048208, Input=? Decompress=
+MISMATCH at index 1048216, Input=? Decompress=
+MISMATCH at index 1048224, Input=? Decompress=
+MISMATCH at index 1048232, Input=? Decompress=
+MISMATCH at index 1048240, Input=? Decompress=
+MISMATCH at index 1048248, Input=? Decompress=
+MISMATCH at index 1048256, Input= Decompress=
+MISMATCH at index 1048264, Input= Decompress=
+MISMATCH at index 1048272, Input= Decompress=
+MISMATCH at index 1048280, Input=" Decompress=
+MISMATCH at index 1048288, Input=, Decompress=
+MISMATCH at index 1048304, Input=
+Decompress=
+MISMATCH at index 1048312, Input= Decompress=
+MISMATCH at index 1048320, Input= Decompress=
+MISMATCH at index 1048328, Input=( Decompress=
+MISMATCH at index 1048336, Input=2 Decompress=
+MISMATCH at index 1048344, Input=< Decompress=
+MISMATCH at index 1048352, Input=F Decompress=
+MISMATCH at index 1048360, Input=P Decompress=
+MISMATCH at index 1048368, Input=Z Decompress=
+MISMATCH at index 1048376, Input=d Decompress=
+MISMATCH at index 1048384, Input=n Decompress=
+MISMATCH at index 1048392, Input=x Decompress=
+MISMATCH at index 1048400, Input=? Decompress=
+MISMATCH at index 1048408, Input=? Decompress=
+MISMATCH at index 1048416, Input=? Decompress=
+MISMATCH at index 1048424, Input=? Decompress=
+MISMATCH at index 1048432, Input=? Decompress=
+MISMATCH at index 1048440, Input=? Decompress=
+MISMATCH at index 1048448, Input=? Decompress=
+MISMATCH at index 1048456, Input=? Decompress=
+MISMATCH at index 1048464, Input=? Decompress=
+MISMATCH at index 1048472, Input=? Decompress=
+MISMATCH at index 1048480, Input=? Decompress=
+MISMATCH at index 1048488, Input=? Decompress=
+MISMATCH at index 1048496, Input=? Decompress=
+MISMATCH at index 1048504, Input= Decompress=
+MISMATCH at index 1048512, Input= Decompress=
+MISMATCH at index 1048520, Input= Decompress=
+MISMATCH at index 1048528, Input=" Decompress=
+MISMATCH at index 1048536, Input=, Decompress=
+MISMATCH at index 1048552, Input=
+Decompress=
+MISMATCH at index 1048560, Input= Decompress=
+MISMATCH at index 1048568, Input= Decompress=
+✱ Running nvprof --cpu-profiling on --export-profile timeline_D2.nvprof -- ./ece508-final /src/data/input_131072_unit8.raw
+total lines = 131072
+==228== NVPROF is profiling process 228, command: ./ece508-final /src/data/input_131072_unit8.raw
+Compression time = 2.89798 milliseconds.scan time = 0.005767 milliseconds.hereMISMATCH at index 1047553, Input= Decompress=d
+MISMATCH at index 1047554, Input= Decompress=?
+MISMATCH at index 1047555, Input= Decompress=,
+MISMATCH at index 1047556, Input= Decompress=?
+MISMATCH at index 1047557, Input= Decompress=?
+MISMATCH at index 1047558, Input= Decompress=X
+MISMATCH at index 1047559, Input= Decompress=?
+MISMATCH at index 1047560, Input=d Decompress=
+MISMATCH at index 1047561, Input= Decompress=?
+MISMATCH at index 1047562, Input= Decompress=?
+MISMATCH at index 1047563, Input= Decompress=L
+MISMATCH at index 1047564, Input= Decompress=?
+MISMATCH at index 1047565, Input= Decompress=
+MISMATCH at index 1047566, Input= Decompress=x
+MISMATCH at index 1047567, Input= Decompress=?
+MISMATCH at index 1047568, Input=? Decompress=@
+MISMATCH at index 1047569, Input= Decompress=?
+MISMATCH at index 1047570, Input= Decompress=
+MISMATCH at index 1047571, Input= Decompress=l
+MISMATCH at index 1047572, Input= Decompress=?
+MISMATCH at index 1047573, Input= Decompress=4
+MISMATCH at index 1047574, Input= Decompress=?
+MISMATCH at index 1047575, Input= Decompress=?
+MISMATCH at index 1047576, Input=, Decompress=`
+MISMATCH at index 1047577, Input= Decompress=?
+MISMATCH at index 1047578, Input= Decompress=(
+MISMATCH at index 1047579, Input= Decompress=?
+MISMATCH at index 1047580, Input= Decompress=?
+MISMATCH at index 1047581, Input= Decompress=T
+MISMATCH at index 1047582, Input= Decompress=?
+MISMATCH at index 1047584, Input=? Decompress=d
+MISMATCH at index 1047585, Input= Decompress=?
+MISMATCH at index 1047586, Input= Decompress=,
+MISMATCH at index 1047587, Input= Decompress=?
+MISMATCH at index 1047588, Input= Decompress=?
+MISMATCH at index 1047589, Input= Decompress=X
+MISMATCH at index 1047590, Input= Decompress=?
+MISMATCH at index 1047591, Input= Decompress=
+MISMATCH at index 1047592, Input=? Decompress=?
+MISMATCH at index 1047593, Input= Decompress=?
+MISMATCH at index 1047594, Input= Decompress=L
+MISMATCH at index 1047595, Input= Decompress=?
+MISMATCH at index 1047596, Input= Decompress=
+MISMATCH at index 1047597, Input= Decompress=x
+MISMATCH at index 1047598, Input= Decompress=?
+MISMATCH at index 1047599, Input= Decompress=@
+MISMATCH at index 1047600, Input=X Decompress=?
+MISMATCH at index 1047601, Input= Decompress=
+MISMATCH at index 1047602, Input= Decompress=l
+MISMATCH at index 1047603, Input= Decompress=?
+MISMATCH at index 1047604, Input= Decompress=4
+MISMATCH at index 1047605, Input= Decompress=?
+MISMATCH at index 1047606, Input= Decompress=?
+MISMATCH at index 1047607, Input= Decompress=`
+MISMATCH at index 1047608, Input=? Decompress=?
+MISMATCH at index 1047609, Input= Decompress=
+MISMATCH at index 1047610, Input= Decompress=
+MISMATCH at index 1047611, Input= Decompress=
+MISMATCH at index 1047612, Input= Decompress="
+MISMATCH at index 1047613, Input= Decompress=,
+MISMATCH at index 1047615, Input= Decompress=
+
+MISMATCH at index 1047616, Input=  Decompress=
+MISMATCH at index 1047617, Input= Decompress=
+MISMATCH at index 1047618, Input= Decompress=(
+MISMATCH at index 1047619, Input= Decompress=2
+MISMATCH at index 1047620, Input= Decompress=<
+MISMATCH at index 1047621, Input= Decompress=F
+MISMATCH at index 1047622, Input= Decompress=P
+MISMATCH at index 1047623, Input= Decompress=Z
+MISMATCH at index 1047624, Input=? Decompress=d
+MISMATCH at index 1047625, Input= Decompress=n
+MISMATCH at index 1047626, Input= Decompress=x
+MISMATCH at index 1047627, Input= Decompress=?
+MISMATCH at index 1047628, Input= Decompress=?
+MISMATCH at index 1047629, Input= Decompress=?
+MISMATCH at index 1047630, Input= Decompress=?
+MISMATCH at index 1047631, Input= Decompress=?
+MISMATCH at index 1047632, Input=? Decompress=?
+MISMATCH at index 1047633, Input= Decompress=?
+MISMATCH at index 1047634, Input= Decompress=?
+MISMATCH at index 1047635, Input= Decompress=?
+MISMATCH at index 1047636, Input= Decompress=?
+MISMATCH at index 1047637, Input= Decompress=?
+MISMATCH at index 1047638, Input= Decompress=?
+MISMATCH at index 1047639, Input= Decompress=?
+MISMATCH at index 1047640, Input=L Decompress=
+MISMATCH at index 1047641, Input= Decompress=
+MISMATCH at index 1047642, Input= Decompress=
+MISMATCH at index 1047643, Input= Decompress="
+MISMATCH at index 1047644, Input= Decompress=,
+MISMATCH at index 1047646, Input= Decompress=
+
+MISMATCH at index 1047647, Input= Decompress=
+MISMATCH at index 1047648, Input=? Decompress=
+MISMATCH at index 1047649, Input= Decompress=(
+MISMATCH at index 1047650, Input= Decompress=2
+MISMATCH at index 1047651, Input= Decompress=<
+MISMATCH at index 1047652, Input= Decompress=F
+MISMATCH at index 1047653, Input= Decompress=P
+MISMATCH at index 1047654, Input= Decompress=Z
+MISMATCH at index 1047655, Input= Decompress=d
+MISMATCH at index 1047656, Input= Decompress=n
+MISMATCH at index 1047657, Input= Decompress=x
+MISMATCH at index 1047658, Input= Decompress=?
+MISMATCH at index 1047659, Input= Decompress=?
+MISMATCH at index 1047660, Input= Decompress=?
+MISMATCH at index 1047661, Input= Decompress=?
+MISMATCH at index 1047662, Input= Decompress=?
+MISMATCH at index 1047663, Input= Decompress=?
+MISMATCH at index 1047664, Input=x Decompress=?
+MISMATCH at index 1047665, Input= Decompress=?
+MISMATCH at index 1047666, Input= Decompress=?
+MISMATCH at index 1047667, Input= Decompress=?
+MISMATCH at index 1047668, Input= Decompress=?
+MISMATCH at index 1047669, Input= Decompress=?
+MISMATCH at index 1047670, Input= Decompress=?
+MISMATCH at index 1047671, Input= Decompress=
+MISMATCH at index 1047672, Input=? Decompress=
+MISMATCH at index 1047673, Input= Decompress=
+MISMATCH at index 1047674, Input= Decompress="
+MISMATCH at index 1047675, Input= Decompress=,
+MISMATCH at index 1047677, Input= Decompress=
+
+MISMATCH at index 1047678, Input= Decompress=
+MISMATCH at index 1047679, Input= Decompress=
+MISMATCH at index 1047680, Input=@ Decompress=
+MISMATCH at index 1047688, Input=? Decompress=
+MISMATCH at index 1047696, Input Decompress=
+MISMATCH at index 1047704, Input=l Decompress=
+MISMATCH at index 1047712, Input=? Decompress=
+MISMATCH at index 1047720, Input=4 Decompress=
+MISMATCH at index 1047728, Input=? Decompress=@
+MISMATCH at index 1047736, Input=? Decompress=
+MISMATCH at index 1047744, Input=` Decompress=
+MISMATCH at index 1047752, Input=? Decompress=
+MISMATCH at index 1047760, Input=( Decompress=
+MISMATCH at index 1047768, Input=? Decompress=
+MISMATCH at index 1047776, Input=? Decompress=
+MISMATCH at index 1047784, Input=T Decompress=
+MISMATCH at index 1047792, Input=? Decompress=?
+MISMATCH at index 1047808, Input=d Decompress=
+MISMATCH at index 1047816, Input=? Decompress=
+MISMATCH at index 1047824, Input=, Decompress=
+MISMATCH at index 1047832, Input=? Decompress=
+MISMATCH at index 1047840, Input=? Decompress=
+MISMATCH at index 1047848, Input=X Decompress=
+MISMATCH at index 1047856, Input=? Decompress=
+MISMATCH at index 1047864, Input=  Decompress=
+MISMATCH at index 1047872, Input=? Decompress=
+MISMATCH at index 1047880, Input=? Decompress=
+MISMATCH at index 1047888, Input=L Decompress=
+MISMATCH at index 1047896, Input=? Decompress=
+MISMATCH at index 1047912, Input=x Decompress=
+MISMATCH at index 1047920, Input=? Decompress=
+MISMATCH at index 1047928, Input=@ Decompress=
+MISMATCH at index 1047936, Input=? Decompress=
+MISMATCH at index 1047944, Input Decompress=
+MISMATCH at index 1047952, Input=l Decompress=
+MISMATCH at index 1047960, Input=? Decompress=?
+MISMATCH at index 1047968, Input=4 Decompress=
+MISMATCH at index 1047976, Input=? Decompress=
+MISMATCH at index 1047984, Input=? Decompress=
+MISMATCH at index 1047992, Input=` Decompress=
+MISMATCH at index 1048000, Input=? Decompress=
+MISMATCH at index 1048008, Input= Decompress=
+MISMATCH at index 1048016, Input= Decompress=
+MISMATCH at index 1048024, Input= Decompress=?
+MISMATCH at index 1048032,
+Input=" Decompress=
+MISMATCH at index 1048040, Input=, Decompress=
+MISMATCH at index 1048056, Input=
+Decompress=
+MISMATCH at index 1048064, Input= Decompress=?
+MISMATCH at index 1048072, Input= Decompress=
+MISMATCH at index 1048073, Input= Decompress=
+MISMATCH at index 1048080, Input=( Decompress=t
+MISMATCH at index 1048088, Input=2 Decompress=?
+MISMATCH at index 1048104, Input=F Decompress=?
+MISMATCH at index 1048112, Input=P Decompress=
+MISMATCH at index 1048113, Input= Decompress=
+MISMATCH at index 1048120, Input=Z Decompress=h
+MISMATCH at index 1048128, Input=d Decompress=?
+MISMATCH at index 1048136, Input=n Decompress=
+MISMATCH at index 1048152, Input=? Decompress=?
+MISMATCH at index 1048160, Input=? Decompress=@
+MISMATCH at index 1048168, Input=? Decompress=?
+MISMATCH at index 1048176, Input=? Decompress=
+MISMATCH at index 1048177, Input= Decompress=
+MISMATCH at index 1048184, Input=? Decompress=l
+MISMATCH at index 1048192, Input=? Decompress=8
+MISMATCH at index 1048200, Input=? Decompress=?
+MISMATCH at index 1048208, Input=? Decompress=
+MISMATCH at index 1048216, Input=? Decompress=d
+MISMATCH at index 1048224, Input=? Decompress=?
+MISMATCH at index 1048232, Input=? Decompress=,
+MISMATCH at index 1048240, Input=? Decompress=?
+MISMATCH at index 1048248, Input=? Decompress=?
+MISMATCH at index 1048256, Input= Decompress=X
+MISMATCH at index 1048264, Input= Decompress=?
+MISMATCH at index 1048272, Input= Decompress=
+MISMATCH at index 1048280, Input=" Decompress=?
+MISMATCH at index 1048288, Input=, Decompress=?
+MISMATCH at index 1048296, Input= Decompress=L
+MISMATCH at index 1048304, Input=
+Decompress=?
+MISMATCH at index 1048312, Input= Decompress=
+MISMATCH at index 1048320, Input= Decompress=?
+MISMATCH at index 1048328, Input=( Decompress=?
+MISMATCH at index 1048336, Input=2 Decompress=V
+MISMATCH at index 1048344, Input=< Decompress=?
+MISMATCH at index 1048352, Input=F Decompress=
+MISMATCH at index 1048360, Input=P Decompress=?
+MISMATCH at index 1048368, Input=Z Decompress=?
+MISMATCH at index 1048376, Input=d Decompress=J
+MISMATCH at index 1048384, Input=n Decompress=?
+MISMATCH at index 1048392, Input=x Decompress=
+MISMATCH at index 1048393, Input= Decompress=
+MISMATCH at index 1048400, Input=? Decompress=v
+MISMATCH at index 1048408, Input=? Decompress=?
+MISMATCH at index 1048416, Input=? Decompress=>
+MISMATCH at index 1048424, Input=? Decompress=?
+MISMATCH at index 1048432, Input=? Decompress=
+MISMATCH at index 1048433, Input= Decompress=
+MISMATCH at index 1048440, Input=? Decompress=j
+MISMATCH at index 1048448, Input=? Decompress=
+MISMATCH at index 1048456, Input=? Decompress=d
+MISMATCH at index 1048464, Input=? Decompress=?
+MISMATCH at index 1048472, Input=? Decompress=,
+MISMATCH at index 1048480, Input=? Decompress=?
+MISMATCH at index 1048488, Input=? Decompress=?
+MISMATCH at index 1048496, Input=? Decompress=X
+MISMATCH at index 1048504, Input= Decompress=?
+MISMATCH at index 1048512, Input= Decompress=
+MISMATCH at index 1048520, Input= Decompress=?
+MISMATCH at index 1048528, Input=" Decompress=?
+MISMATCH at index 1048536, Input=, Decompress=D
+MISMATCH at index 1048544, Input= Decompress=?
+MISMATCH at index 1048552, Input=
+Decompress=
+
+MISMATCH at index 1048560, Input= Decompress=p
+MISMATCH at index 1048568, Input= Decompress=?
+==228== Generated result file: /build/timeline_D2.nvprof
+✱ Running nvprof --cpu-profiling on --export-profile analysis_D2.nvprof --analysis-metrics -- ./ece508-final /src/data/input_131072_unit8.raw
+======== Warning: Metric "l1_shared_utilization" cannot be found on device 0.
+======== Warning: Metric "l1_shared_utilization" cannot be found on device 1.
+======== Warning: Metric "l1_shared_utilization" cannot be found on device 2.
+======== Warning: Metric "l1_shared_utilization" cannot be found on device 3.
+======== Warning: Metric "alu_fu_utilization" cannot be found on device 0.
+======== Warning: Metric "alu_fu_utilization" cannot be found on device 1.
+======== Warning: Metric "alu_fu_utilization" cannot be found on device 2.
+======== Warning: Metric "alu_fu_utilization" cannot be found on device 3.
+======== Warning: Metric "ecc_throughput" cannot be found on device 0.
+======== Warning: Metric "ecc_throughput" cannot be found on device 1.
+======== Warning: Metric "ecc_throughput" cannot be found on device 2.
+======== Warning: Metric "ecc_throughput" cannot be found on device 3.
+======== Warning: Metric "ecc_transactions" cannot be found on device 0.
+======== Warning: Metric "ecc_transactions" cannot be found on device 1.
+======== Warning: Metric "ecc_transactions" cannot be found on device 2.
+======== Warning: Metric "ecc_transactions" cannot be found on device 3.
+======== Warning: Metric "l2_l1_read_transactions" cannot be found on device 0.
+======== Warning: Metric "l2_l1_read_transactions" cannot be found on device 1.
+======== Warning: Metric "l2_l1_read_transactions" cannot be found on device 2.
+======== Warning: Metric "l2_l1_read_transactions" cannot be found on device 3.
+======== Warning: Metric "l2_l1_write_transactions" cannot be found on device 0.
+======== Warning: Metric "l2_l1_write_transactions" cannot be found on device 1.
+======== Warning: Metric "l2_l1_write_transactions" cannot be found on device 2.
+======== Warning: Metric "l2_l1_write_transactions" cannot be found on device 3.
+======== Warning: Metric "nc_l2_read_transactions" cannot be found on device 0.
+======== Warning: Metric "nc_l2_read_transactions" cannot be found on device 1.
+======== Warning: Metric "nc_l2_read_transactions" cannot be found on device 2.
+======== Warning: Metric "nc_l2_read_transactions" cannot be found on device 3.
+======== Warning: Metric "l2_l1_read_throughput" cannot be found on device 0.
+======== Warning: Metric "l2_l1_read_throughput" cannot be found on device 1.
+======== Warning: Metric "l2_l1_read_throughput" cannot be found on device 2.
+======== Warning: Metric "l2_l1_read_throughput" cannot be found on device 3.
+======== Warning: Metric "l2_l1_write_throughput" cannot be found on device 0.
+======== Warning: Metric "l2_l1_write_throughput" cannot be found on device 1.
+======== Warning: Metric "l2_l1_write_throughput" cannot be found on device 2.
+======== Warning: Metric "l2_l1_write_throughput" cannot be found on device 3.
+======== Warning: Metric "nc_l2_read_throughput" cannot be found on device 0.
+======== Warning: Metric "nc_l2_read_throughput" cannot be found on device 1.
+======== Warning: Metric "nc_l2_read_throughput" cannot be found on device 2.
+======== Warning: Metric "nc_l2_read_throughput" cannot be found on device 3.
+======== Warning: Metric "atomic_throughput" cannot be found on device 0.
+======== Warning: Metric "atomic_throughput" cannot be found on device 1.
+======== Warning: Metric "atomic_throughput" cannot be found on device 2.
+======== Warning: Metric "atomic_throughput" cannot be found on device 3.
+total lines = 131072
+==246== NVPROF is profiling process 246, command: ./ece508-final /src/data/input_131072_unit8.raw
+==246== Some kernel(s) will be replayed on device 0 in order to collect all events/metrics.
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (0 of 36)...
+==246== Replaying kernel "decompress_kernel_lai(char*, char*, int, int*, long*)" (done)
+Compression time = 3.74408 milliseconds.scan time = 0.005971 milliseconds.hereMISMATCH at index 1047553, Input= Decompress=d
+MISMATCH at index 1047554, Input= Decompress=?
+MISMATCH at index 1047555, Input= Decompress=,
+MISMATCH at index 1047556, Input= Decompress=?
+MISMATCH at index 1047557, Input= Decompress=?
+MISMATCH at index 1047558, Input= Decompress=X
+MISMATCH at index 1047559, Input= Decompress=?
+MISMATCH at index 1047560, Input=d Decompress=
+MISMATCH at index 1047561, Input= Decompress=?
+MISMATCH at index 1047562, Input= Decompress=?
+MISMATCH at index 1047563, Input= Decompress=L
+MISMATCH at index 1047564, Input= Decompress=?
+MISMATCH at index 1047565, Input= Decompress=
+MISMATCH at index 1047566, Input= Decompress=x
+MISMATCH at index 1047567, Input= Decompress=?
+MISMATCH at index 1047568, Input=? Decompress=@
+MISMATCH at index 1047569, Input= Decompress=?
+MISMATCH at index 1047570, Input= Decompress=
+MISMATCH at index 1047571, Input= Decompress=l
+MISMATCH at index 1047572, Input= Decompress=?
+MISMATCH at index 1047573, Input= Decompress=4
+MISMATCH at index 1047574, Input= Decompress=?
+MISMATCH at index 1047575, Input= Decompress=?
+MISMATCH at index 1047576, Input=, Decompress=`
+MISMATCH at index 1047577, Input= Decompress=?
+MISMATCH at index 1047578, Input= Decompress=(
+MISMATCH at index 1047579, Input= Decompress=?
+MISMATCH at index 1047580, Input= Decompress=?
+MISMATCH at index 1047581, Input= Decompress=T
+MISMATCH at index 1047582, Input= Decompress=?
+MISMATCH at index 1047584, Input=? Decompress=d
+MISMATCH at index 1047585, Input= Decompress=?
+MISMATCH at index 1047586, Input= Decompress=,
+MISMATCH at index 1047587, Input= Decompress=?
+MISMATCH at index 1047588, Input= Decompress=?
+MISMATCH at index 1047589, Input= Decompress=X
+MISMATCH at index 1047590, Input= Decompress=?
+MISMATCH at index 1047591, Input= Decompress=
+MISMATCH at index 1047592, Input=? Decompress=?
+MISMATCH at index 1047593, Input= Decompress=?
+MISMATCH at index 1047594, Input= Decompress=L
+MISMATCH at index 1047595, Input= Decompress=?
+MISMATCH at index 1047596, Input= Decompress=
+MISMATCH at index 1047597, Input= Decompress=x
+MISMATCH at index 1047598, Input= Decompress=?
+MISMATCH at index 1047599, Input= Decompress=@
+MISMATCH at index 1047600, Input=X Decompress=?
+MISMATCH at index 1047601, Input= Decompress=
+MISMATCH at index 1047602, Input= Decompress=l
+MISMATCH at index 1047603, Input= Decompress=?
+MISMATCH at index 1047604, Input= Decompress=4
+MISMATCH at index 1047605, Input= Decompress=?
+MISMATCH at index 1047606, Input= Decompress=?
+MISMATCH at index 1047607, Input= Decompress=`
+MISMATCH at index 1047608, Input=? Decompress=?
+MISMATCH at index 1047609, Input= Decompress=
+MISMATCH at index 1047610, Input= Decompress=
+MISMATCH at index 1047611, Input= Decompress=
+MISMATCH at index 1047612, Input= Decompress="
+MISMATCH at index 1047613, Input= Decompress=,
+MISMATCH at index 1047615, Input= Decompress=
+
+MISMATCH at index 1047616, Input=  Decompress=
+MISMATCH at index 1047617, Input= Decompress=
+MISMATCH at index 1047618, Input= Decompress=(
+MISMATCH at index 1047619, Input= Decompress=2
+MISMATCH at index 1047620, Input= Decompress=<
+MISMATCH at index 1047621, Input= Decompress=F
+MISMATCH at index 1047622, Input= Decompress=P
+MISMATCH at index 1047623, Input= Decompress=Z
+MISMATCH at index 1047624, Input=? Decompress=d
+MISMATCH at index 1047625, Input= Decompress=n
+MISMATCH at index 1047626, Input= Decompress=x
+MISMATCH at index 1047627, Input= Decompress=?
+MISMATCH at index 1047628, Input= Decompress=?
+MISMATCH at index 1047629, Input= Decompress=?
+MISMATCH at index 1047630, Input= Decompress=?
+MISMATCH at index 1047631, Input= Decompress=?
+MISMATCH at index 1047632, Input=? Decompress=?
+MISMATCH at index 1047633, Input= Decompress=?
+MISMATCH at index 1047634, Input= Decompress=?
+MISMATCH at index 1047635, Input= Decompress=?
+MISMATCH at index 1047636, Input= Decompress=?
+MISMATCH at index 1047637, Input= Decompress=?
+MISMATCH at index 1047638, Input= Decompress=?
+MISMATCH at index 1047639, Input= Decompress=?
+MISMATCH at index 1047640, Input=L Decompress=
+MISMATCH at index 1047641, Input= Decompress=
+MISMATCH at index 1047642, Input= Decompress=
+MISMATCH at index 1047643, Input= Decompress="
+MISMATCH at index 1047644, Input= Decompress=,
+MISMATCH at index 1047646, Input= Decompress=
+
+MISMATCH at index 1047647, Input= Decompress=
+MISMATCH at index 1047648, Input=? Decompress=
+MISMATCH at index 1047649, Input= Decompress=(
+MISMATCH at index 1047650, Input= Decompress=2
+MISMATCH at index 1047651, Input= Decompress=<
+MISMATCH at index 1047652, Input= Decompress=F
+MISMATCH at index 1047653, Input= Decompress=P
+MISMATCH at index 1047654, Input= Decompress=Z
+MISMATCH at index 1047655, Input= Decompress=d
+MISMATCH at index 1047656, Input= Decompress=n
+MISMATCH at index 1047657, Input= Decompress=x
+MISMATCH at index 1047658, Input= Decompress=?
+MISMATCH at index 1047659, Input= Decompress=?
+MISMATCH at index 1047660, Input= Decompress=?
+MISMATCH at index 1047661, Input= Decompress=?
+MISMATCH at index 1047662, Input= Decompress=?
+MISMATCH at index 1047663, Input= Decompress=?
+MISMATCH at index 1047664, Input=x Decompress=?
+MISMATCH at index 1047665, Input= Decompress=?
+MISMATCH at index 1047666, Input= Decompress=?
+MISMATCH at index 1047667, Input= Decompress=?
+MISMATCH at index 1047668, Input= Decompress=?
+MISMATCH at index 1047669, Input= Decompress=?
+MISMATCH at index 1047670, Input= Decompress=?
+MISMATCH at index 1047671, Input= Decompress=
+MISMATCH at index 1047672, Input=? Decompress=
+MISMATCH at index 1047673, Input= Decompress=
+MISMATCH at index 1047674, Input= Decompress="
+MISMATCH at index 1047675, Input= Decompress=,
+MISMATCH at index 1047677, Input= Decompress=
+
+MISMATCH at index 1047678, Input= Decompress=
+MISMATCH at index 1047679, Input= Decompress=
+MISMATCH at index 1047680, Input=@ Decompress=
+MISMATCH at index 1047688, Input=? Decompress=
+MISMATCH at index 1047696, Input Decompress=
+MISMATCH at index 1047704, Input=l Decompress=
+MISMATCH at index 1047712, Input=? Decompress=
+MISMATCH at index 1047720, Input=4 Decompress=
+MISMATCH at index 1047728, Input=? Decompress=@
+MISMATCH at index 1047736, Input=? Decompress=
+MISMATCH at index 1047744, Input=` Decompress=
+MISMATCH at index 1047752, Input=? Decompress=
+MISMATCH at index 1047760, Input=( Decompress=
+MISMATCH at index 1047768, Input=? Decompress=
+MISMATCH at index 1047776, Input=? Decompress=
+MISMATCH at index 1047784, Input=T Decompress=
+MISMATCH at index 1047792, Input=? Decompress=?
+MISMATCH at index 1047808, Input=d Decompress=
+MISMATCH at index 1047816, Input=? Decompress=
+MISMATCH at index 1047824, Input=, Decompress=
+MISMATCH at index 1047832, Input=? Decompress=
+MISMATCH at index 1047840, Input=? Decompress=
+MISMATCH at index 1047848, Input=X Decompress=
+MISMATCH at index 1047856, Input=? Decompress=
+MISMATCH at index 1047864, Input=  Decompress=
+MISMATCH at index 1047872, Input=? Decompress=
+MISMATCH at index 1047880, Input=? Decompress=
+MISMATCH at index 1047888, Input=L Decompress=
+MISMATCH at index 1047896, Input=? Decompress=
+MISMATCH at index 1047912, Input=x Decompress=
+MISMATCH at index 1047920, Input=? Decompress=
+MISMATCH at index 1047928, Input=@ Decompress=
+MISMATCH at index 1047936, Input=? Decompress=
+MISMATCH at index 1047944, Input Decompress=
+MISMATCH at index 1047952, Input=l Decompress=
+MISMATCH at index 1047960, Input=? Decompress=?
+MISMATCH at index 1047968, Input=4 Decompress=
+MISMATCH at index 1047976, Input=? Decompress=
+MISMATCH at index 1047984, Input=? Decompress=
+MISMATCH at index 1047992, Input=` Decompress=
+MISMATCH at index 1048000, Input=? Decompress=
+MISMATCH at index 1048008, Input= Decompress=
+MISMATCH at index 1048016, Input= Decompress=
+MISMATCH at index 1048024, Input= Decompress=?
+MISMATCH at index 1048032,
+Input=" Decompress=
+MISMATCH at index 1048040, Input=, Decompress=
+MISMATCH at index 1048056, Input=
+Decompress=
+MISMATCH at index 1048064, Input= Decompress=?
+MISMATCH at index 1048072, Input= Decompress=
+MISMATCH at index 1048073, Input= Decompress=
+MISMATCH at index 1048080, Input=( Decompress=t
+MISMATCH at index 1048088, Input=2 Decompress=?
+MISMATCH at index 1048104, Input=F Decompress=?
+MISMATCH at index 1048112, Input=P Decompress=
+MISMATCH at index 1048113, Input= Decompress=
+MISMATCH at index 1048120, Input=Z Decompress=h
+MISMATCH at index 1048128, Input=d Decompress=?
+MISMATCH at index 1048136, Input=n Decompress=
+MISMATCH at index 1048152, Input=? Decompress=?
+MISMATCH at index 1048160, Input=? Decompress=@
+MISMATCH at index 1048168, Input=? Decompress=?
+MISMATCH at index 1048176, Input=? Decompress=
+MISMATCH at index 1048177, Input= Decompress=
+MISMATCH at index 1048184, Input=? Decompress=l
+MISMATCH at index 1048192, Input=? Decompress=8
+MISMATCH at index 1048200, Input=? Decompress=?
+MISMATCH at index 1048208, Input=? Decompress=
+MISMATCH at index 1048216, Input=? Decompress=d
+MISMATCH at index 1048224, Input=? Decompress=?
+MISMATCH at index 1048232, Input=? Decompress=,
+MISMATCH at index 1048240, Input=? Decompress=?
+MISMATCH at index 1048248, Input=? Decompress=?
+MISMATCH at index 1048256, Input= Decompress=X
+MISMATCH at index 1048264, Input= Decompress=?
+MISMATCH at index 1048272, Input= Decompress=
+MISMATCH at index 1048280, Input=" Decompress=?
+MISMATCH at index 1048288, Input=, Decompress=?
+MISMATCH at index 1048296, Input= Decompress=L
+MISMATCH at index 1048304, Input=
+Decompress=?
+MISMATCH at index 1048312, Input= Decompress=
+MISMATCH at index 1048320, Input= Decompress=?
+MISMATCH at index 1048328, Input=( Decompress=?
+MISMATCH at index 1048336, Input=2 Decompress=V
+MISMATCH at index 1048344, Input=< Decompress=?
+MISMATCH at index 1048352, Input=F Decompress=
+MISMATCH at index 1048360, Input=P Decompress=?
+MISMATCH at index 1048368, Input=Z Decompress=?
+MISMATCH at index 1048376, Input=d Decompress=J
+MISMATCH at index 1048384, Input=n Decompress=?
+MISMATCH at index 1048392, Input=x Decompress=
+MISMATCH at index 1048393, Input= Decompress=
+MISMATCH at index 1048400, Input=? Decompress=v
+MISMATCH at index 1048408, Input=? Decompress=?
+MISMATCH at index 1048416, Input=? Decompress=>
+MISMATCH at index 1048424, Input=? Decompress=?
+MISMATCH at index 1048432, Input=? Decompress=
+MISMATCH at index 1048433, Input= Decompress=
+MISMATCH at index 1048440, Input=? Decompress=j
+MISMATCH at index 1048448, Input=? Decompress=
+MISMATCH at index 1048456, Input=? Decompress=d
+MISMATCH at index 1048464, Input=? Decompress=?
+MISMATCH at index 1048472, Input=? Decompress=,
+MISMATCH at index 1048480, Input=? Decompress=?
+MISMATCH at index 1048488, Input=? Decompress=?
+MISMATCH at index 1048496, Input=? Decompress=X
+MISMATCH at index 1048504, Input= Decompress=?
+MISMATCH at index 1048512, Input= Decompress=
+MISMATCH at index 1048520, Input= Decompress=?
+MISMATCH at index 1048528, Input=" Decompress=?
+MISMATCH at index 1048536, Input=, Decompress=D
+MISMATCH at index 1048544, Input= Decompress=?
+MISMATCH at index 1048552, Input=
+Decompress=
+
+MISMATCH at index 1048560, Input= Decompress=p
+MISMATCH at index 1048568, Input= Decompress=?
+==246== Generated result file: /build/analysis_D2.nvprof
+✱ Running rm /src/src/main.cu
+✱ Running rm ece508-final
+✱ Running mv /src/src/main_namit.cu /src/src/main.cu
+✱ Running make -C /src
+make: Entering directory '/src'
+/usr/local/cuda/bin/nvcc  -I src/src src/main.cu -o /build/ece508-final -O3 -std=c++11 -arch=sm_35 -ccbin g++-4.9
+src/main.cu(831): warning: variable "compression_ratio" was declared but never referenced
+src/main.cu(947): warning: variable "l_array" was declared but never referenced
+src/main.cu(831): warning: variable "compression_ratio" was declared but never referenced
+src/main.cu(947): warning: variable "l_array" was declared but never referenced
+src/main.cu: In function 'int main(int, char**)':
+src/main.cu:940:47: warning: format '%d' expects argument of type 'int', but argument 2 has type 'long unsigned int' [-Wformat=]
+printf("Sizeofuint16 = %d\n", sizeof(uint16_t));
+^
+make: Leaving directory '/src'
+✱ Running ./ece508-final /src/data/input_131072_unit8.raw
+total lines = 131072
+Time to compress on CPU = 2.946 milliseconds.
+numBlocks = 2048
+numBytesBeforeCompress = 1048576
+numElements = 131072
+numBytesAfterCompress = 131072
+Sizeofuint16 = 2
+✱ Running nvprof --cpu-profiling on --export-profile timeline_D3.nvprof -- ./ece508-final /src/data/input_131072_unit8.raw
+total lines = 131072
+Time to compress on CPU = 2.94788 milliseconds.
+==348== NVPROF is profiling process 348, command: ./ece508-final /src/data/input_131072_unit8.raw
+numBlocks = 2048
+numBytesBeforeCompress = 1048576
+numElements = 131072
+numBytesAfterCompress = 131072
+Sizeofuint16 = 2
+==348== Generated result file: /build/timeline_D3.nvprof
+✱ Running nvprof --cpu-profiling on --export-profile analysis_D3.nvprof --analysis-metrics -- ./ece508-final /src/data/input_131072_unit8.raw
+======== Warning: Metric "l1_shared_utilization" cannot be found on device 0.
+======== Warning: Metric "l1_shared_utilization" cannot be found on device 1.
+======== Warning: Metric "l1_shared_utilization" cannot be found on device 2.
+======== Warning: Metric "l1_shared_utilization" cannot be found on device 3.
+======== Warning: Metric "alu_fu_utilization" cannot be found on device 0.
+======== Warning: Metric "alu_fu_utilization" cannot be found on device 1.
+======== Warning: Metric "alu_fu_utilization" cannot be found on device 2.
+======== Warning: Metric "alu_fu_utilization" cannot be found on device 3.
+======== Warning: Metric "ecc_throughput" cannot be found on device 0.
+======== Warning: Metric "ecc_throughput" cannot be found on device 1.
+======== Warning: Metric "ecc_throughput" cannot be found on device 2.
+======== Warning: Metric "ecc_throughput" cannot be found on device 3.
+======== Warning: Metric "ecc_transactions" cannot be found on device 0.
+======== Warning: Metric "ecc_transactions" cannot be found on device 1.
+======== Warning: Metric "ecc_transactions" cannot be found on device 2.
+======== Warning: Metric "ecc_transactions" cannot be found on device 3.
+======== Warning: Metric "l2_l1_read_transactions" cannot be found on device 0.
+======== Warning: Metric "l2_l1_read_transactions" cannot be found on device 1.
+======== Warning: Metric "l2_l1_read_transactions" cannot be found on device 2.
+======== Warning: Metric "l2_l1_read_transactions" cannot be found on device 3.
+======== Warning: Metric "l2_l1_write_transactions" cannot be found on device 0.
+======== Warning: Metric "l2_l1_write_transactions" cannot be found on device 1.
+======== Warning: Metric "l2_l1_write_transactions" cannot be found on device 2.
+======== Warning: Metric "l2_l1_write_transactions" cannot be found on device 3.
+======== Warning: Metric "nc_l2_read_transactions" cannot be found on device 0.
+======== Warning: Metric "nc_l2_read_transactions" cannot be found on device 1.
+======== Warning: Metric "nc_l2_read_transactions" cannot be found on device 2.
+======== Warning: Metric "nc_l2_read_transactions" cannot be found on device 3.
+======== Warning: Metric "l2_l1_read_throughput" cannot be found on device 0.
+======== Warning: Metric "l2_l1_read_throughput" cannot be found on device 1.
+======== Warning: Metric "l2_l1_read_throughput" cannot be found on device 2.
+======== Warning: Metric "l2_l1_read_throughput" cannot be found on device 3.
+======== Warning: Metric "l2_l1_write_throughput" cannot be found on device 0.
+======== Warning: Metric "l2_l1_write_throughput" cannot be found on device 1.
+======== Warning: Metric "l2_l1_write_throughput" cannot be found on device 2.
+======== Warning: Metric "l2_l1_write_throughput" cannot be found on device 3.
+======== Warning: Metric "nc_l2_read_throughput" cannot be found on device 0.
+======== Warning: Metric "nc_l2_read_throughput" cannot be found on device 1.
+======== Warning: Metric "nc_l2_read_throughput" cannot be found on device 2.
+======== Warning: Metric "nc_l2_read_throughput" cannot be found on device 3.
+======== Warning: Metric "atomic_throughput" cannot be found on device 0.
+======== Warning: Metric "atomic_throughput" cannot be found on device 1.
+======== Warning: Metric "atomic_throughput" cannot be found on device 2.
+======== Warning: Metric "atomic_throughput" cannot be found on device 3.
+total lines = 131072
+Time to compress on CPU = 2.94299 milliseconds.
+==366== NVPROF is profiling process 366, command: ./ece508-final /src/data/input_131072_unit8.raw
+==366== Some kernel(s) will be replayed on device 0 in order to collect all events/metrics.
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_n(short*, float*, int)" (done)
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "ExtractLast(float*, float*, int)" (done)
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "scan_regular(float*, float*, int)" (done)
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (0 of 36)...
+==366== Replaying kernel "Finaladd(float*, float*, int)" (done)
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (0 of 36)...
+==366== Replaying kernel "decompress_n(char*, long*, short*, float*, long*, int)" (done)
+numBlocks = 2048
+numBytesBeforeCompress = 1048576
+numElements = 131072
+numBytesAfterCompress = 131072
+Sizeofuint16 = 2
+==366== Generated result file: /build/analysis_D3.nvprof
+✱ Running rm /src/src/main.cu
+✱ Running rm ece508-final
+✱ Running mv /src/src/compress_reduced.cu /src/src/main.cu
+✱ Running make -C /src
+make: Entering directory '/src'
+/usr/local/cuda/bin/nvcc  -I src/src src/main.cu -o /build/ece508-final -O3 -std=c++11 -arch=sm_35 -ccbin g++-4.9
+src/main.cu(304): warning: variable "local_storage" was declared but never referenced
+src/main.cu(615): warning: variable "a" was declared but never referenced
+
+src/main.cu(617): warning: variable "a1" was set but never used
+src/main.cu(304): warning: variable "local_storage" was declared but never referenced
+src/main.cu(615): warning: variable "a" was declared but never referenced
+
+src/main.cu(617): warning: variable "a1" was set but never used
+make: Leaving directory '/src'
+✱ Running ./ece508-final /src/data/input_131072_unit8.raw
+total lines = 131072
+CPU simple time =  5.1e-05 milliseconds.
+Length , Bytes copied  : 1048576 , 131072
+CPU Decompression time =  0.916204 milliseconds.
+SuccessfulCpu
+Compression time =  3.43558 milliseconds.
+Transfer CPU to GPU time =  0.080194 milliseconds.
+Decompress Kernel time 0.059963milliseconds
+SUCCESSFUL
+✱ Running nvprof --cpu-profiling on --export-profile timeline_D1.2.nvprof -- ./ece508-final /src/data/input_131072_unit8.raw
+total lines = 131072
+CPU simple time =  3.9e-05 milliseconds.
+Length , Bytes copied  : 1048576 , 131072
+CPU Decompression time =  0.688799 milliseconds.
+SuccessfulCpu
+Compression time =  2.77754 milliseconds.
+==476== NVPROF is profiling process 476, command: ./ece508-final /src/data/input_131072_unit8.raw
+Transfer CPU to GPU time =  0.571731 milliseconds.
+Decompress Kernel time 0.096248milliseconds
+SUCCESSFUL
+==476== Generated result file: /build/timeline_D1.2.nvprof
+✱ Running nvprof --cpu-profiling on --export-profile analysis_D1.2.nvprof --analysis-metrics -- ./ece508-final /src/data/input_131072_unit8.raw
+======== Warning: Metric "l1_shared_utilization" cannot be found on device 0.
+======== Warning: Metric "l1_shared_utilization" cannot be found on device 1.
+======== Warning: Metric "l1_shared_utilization" cannot be found on device 2.
+======== Warning: Metric "l1_shared_utilization" cannot be found on device 3.
+======== Warning: Metric "alu_fu_utilization" cannot be found on device 0.
+======== Warning: Metric "alu_fu_utilization" cannot be found on device 1.
+======== Warning: Metric "alu_fu_utilization" cannot be found on device 2.
+======== Warning: Metric "alu_fu_utilization" cannot be found on device 3.
+======== Warning: Metric "ecc_throughput" cannot be found on device 0.
+======== Warning: Metric "ecc_throughput" cannot be found on device 1.
+======== Warning: Metric "ecc_throughput" cannot be found on device 2.
+======== Warning: Metric "ecc_throughput" cannot be found on device 3.
+======== Warning: Metric "ecc_transactions" cannot be found on device 0.
+======== Warning: Metric "ecc_transactions" cannot be found on device 1.
+======== Warning: Metric "ecc_transactions" cannot be found on device 2.
+======== Warning: Metric "ecc_transactions" cannot be found on device 3.
+======== Warning: Metric "l2_l1_read_transactions" cannot be found on device 0.
+======== Warning: Metric "l2_l1_read_transactions" cannot be found on device 1.
+======== Warning: Metric "l2_l1_read_transactions" cannot be found on device 2.
+======== Warning: Metric "l2_l1_read_transactions" cannot be found on device 3.
+======== Warning: Metric "l2_l1_write_transactions" cannot be found on device 0.
+======== Warning: Metric "l2_l1_write_transactions" cannot be found on device 1.
+======== Warning: Metric "l2_l1_write_transactions" cannot be found on device 2.
+======== Warning: Metric "l2_l1_write_transactions" cannot be found on device 3.
+======== Warning: Metric "nc_l2_read_transactions" cannot be found on device 0.
+======== Warning: Metric "nc_l2_read_transactions" cannot be found on device 1.
+======== Warning: Metric "nc_l2_read_transactions" cannot be found on device 2.
+======== Warning: Metric "nc_l2_read_transactions" cannot be found on device 3.
+======== Warning: Metric "l2_l1_read_throughput" cannot be found on device 0.
+======== Warning: Metric "l2_l1_read_throughput" cannot be found on device 1.
+======== Warning: Metric "l2_l1_read_throughput" cannot be found on device 2.
+======== Warning: Metric "l2_l1_read_throughput" cannot be found on device 3.
+======== Warning: Metric "l2_l1_write_throughput" cannot be found on device 0.
+======== Warning: Metric "l2_l1_write_throughput" cannot be found on device 1.
+======== Warning: Metric "l2_l1_write_throughput" cannot be found on device 2.
+======== Warning: Metric "l2_l1_write_throughput" cannot be found on device 3.
+======== Warning: Metric "nc_l2_read_throughput" cannot be found on device 0.
+======== Warning: Metric "nc_l2_read_throughput" cannot be found on device 1.
+======== Warning: Metric "nc_l2_read_throughput" cannot be found on device 2.
+======== Warning: Metric "nc_l2_read_throughput" cannot be found on device 3.
+======== Warning: Metric "atomic_throughput" cannot be found on device 0.
+======== Warning: Metric "atomic_throughput" cannot be found on device 1.
+======== Warning: Metric "atomic_throughput" cannot be found on device 2.
+======== Warning: Metric "atomic_throughput" cannot be found on device 3.
+total lines = 131072
+CPU simple time =  4.7e-05 milliseconds.
+Length , Bytes copied  : 1048576 , 131072
+CPU Decompression time =  0.688392 milliseconds.
+SuccessfulCpu
+Compression time =  2.77487 milliseconds.
+==494== NVPROF is profiling process 494, command: ./ece508-final /src/data/input_131072_unit8.raw
+Transfer CPU to GPU time =  0.081927 milliseconds.
+==494== Some kernel(s) will be replayed on device 0 in order to collect all events/metrics.
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494==
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (0 of 36)...
+==494== Replaying kernel "decompress_kernel(char*, char*, int, short*, long*, int*)" (done)
+Decompress Kernel time 1240milliseconds
+SUCCESSFUL
+==494== Generated result file: /build/analysis_D1.2.nvprof
+✱ Running rm src/src/main.cu
+rm: cannot remove 'src/src/main.cu': No such file or directory
+✱ Running rm ece508-final
+✱ Running mv /src/src/main_D4.cu /src/src/main.cu
+✱ Running make -C /src
+make: Entering directory '/src'
+/usr/local/cuda/bin/nvcc  -I src/src src/main.cu -o /build/ece508-final -O3 -std=c++11 -arch=sm_35 -ccbin g++-4.9
+src/main.cu(496): warning: variable "local_storage" was declared but never referenced
+src/main.cu(829): warning: variable "compression_ratio" was declared but never referenced
+
+src/main.cu(948): warning: variable "l_array" was declared but never referenced
+src/main.cu(496): warning: variable "local_storage" was declared but never referenced
+src/main.cu(829): warning: variable "compression_ratio" was declared but never referenced
+
+src/main.cu(948): warning: variable "l_array" was declared but never referenced
+src/main.cu: In function 'int main(int, char**)':
+src/main.cu:941:47: warning: format '%d' expects argument of type 'int', but argument 2 has type 'long unsigned int' [-Wformat=]
+printf("Sizeofuint16 = %d\n", sizeof(uint16_t));
+^
+make: Leaving directory '/src'
+✱ Running ./ece508-final /src/data/input_131072_unit8.raw
+total lines = 131072
+Time to compress on CPU = 3.06995 milliseconds.
+numBlocks = 2048
+numBytesBeforeCompress = 1048576
+numElements = 131072
+numBytesAfterCompress = 131072
+Sizeofuint16 = 2
+✱ Running nvprof --cpu-profiling on --export-profile timeline_D4.nvprof -- ./ece508-final /src/data/input_131072_unit8.raw
+total lines = 131072
+Time to compress on CPU = 3.05433 milliseconds.
+==597== NVPROF is profiling process 597, command: ./ece508-final /src/data/input_131072_unit8.raw
+numBlocks = 2048
+numBytesBeforeCompress = 1048576
+numElements = 131072
+numBytesAfterCompress = 131072
+Sizeofuint16 = 2
+==597== Generated result file: /build/timeline_D4.nvprof
+✱ Running nvprof --cpu-profiling on --export-profile analysis_D4.nvprof --analysis-metrics -- ./ece508-final /src/data/input_131072_unit8.raw
+======== Warning: Metric "l1_shared_utilization" cannot be found on device 0.
+======== Warning: Metric "l1_shared_utilization" cannot be found on device 1.
+======== Warning: Metric "l1_shared_utilization" cannot be found on device 2.
+======== Warning: Metric "l1_shared_utilization" cannot be found on device 3.
+======== Warning: Metric "alu_fu_utilization" cannot be found on device 0.
+======== Warning: Metric "alu_fu_utilization" cannot be found on device 1.
+======== Warning: Metric "alu_fu_utilization" cannot be found on device 2.
+======== Warning: Metric "alu_fu_utilization" cannot be found on device 3.
+======== Warning: Metric "ecc_throughput" cannot be found on device 0.
+======== Warning: Metric "ecc_throughput" cannot be found on device 1.
+======== Warning: Metric "ecc_throughput" cannot be found on device 2.
+======== Warning: Metric "ecc_throughput" cannot be found on device 3.
+======== Warning: Metric "ecc_transactions" cannot be found on device 0.
+======== Warning: Metric "ecc_transactions" cannot be found on device 1.
+======== Warning: Metric "ecc_transactions" cannot be found on device 2.
+======== Warning: Metric "ecc_transactions" cannot be found on device 3.
+======== Warning: Metric "l2_l1_read_transactions" cannot be found on device 0.
+======== Warning: Metric "l2_l1_read_transactions" cannot be found on device 1.
+======== Warning: Metric "l2_l1_read_transactions" cannot be found on device 2.
+======== Warning: Metric "l2_l1_read_transactions" cannot be found on device 3.
+======== Warning: Metric "l2_l1_write_transactions" cannot be found on device 0.
+======== Warning: Metric "l2_l1_write_transactions" cannot be found on device 1.
+======== Warning: Metric "l2_l1_write_transactions" cannot be found on device 2.
+======== Warning: Metric "l2_l1_write_transactions" cannot be found on device 3.
+======== Warning: Metric "nc_l2_read_transactions" cannot be found on device 0.
+======== Warning: Metric "nc_l2_read_transactions" cannot be found on device 1.
+======== Warning: Metric "nc_l2_read_transactions" cannot be found on device 2.
+======== Warning: Metric "nc_l2_read_transactions" cannot be found on device 3.
+======== Warning: Metric "l2_l1_read_throughput" cannot be found on device 0.
+======== Warning: Metric "l2_l1_read_throughput" cannot be found on device 1.
+======== Warning: Metric "l2_l1_read_throughput" cannot be found on device 2.
+======== Warning: Metric "l2_l1_read_throughput" cannot be found on device 3.
+======== Warning: Metric "l2_l1_write_throughput" cannot be found on device 0.
+======== Warning: Metric "l2_l1_write_throughput" cannot be found on device 1.
+======== Warning: Metric "l2_l1_write_throughput" cannot be found on device 2.
+======== Warning: Metric "l2_l1_write_throughput" cannot be found on device 3.
+======== Warning: Metric "nc_l2_read_throughput" cannot be found on device 0.
+======== Warning: Metric "nc_l2_read_throughput" cannot be found on device 1.
+======== Warning: Metric "nc_l2_read_throughput" cannot be found on device 2.
+======== Warning: Metric "nc_l2_read_throughput" cannot be found on device 3.
+======== Warning: Metric "atomic_throughput" cannot be found on device 0.
+======== Warning: Metric "atomic_throughput" cannot be found on device 1.
+======== Warning: Metric "atomic_throughput" cannot be found on device 2.
+======== Warning: Metric "atomic_throughput" cannot be found on device 3.
+total lines = 131072
+Time to compress on CPU = 3.02462 milliseconds.
+==615== NVPROF is profiling process 615, command: ./ece508-final /src/data/input_131072_unit8.raw
+==615== Some kernel(s) will be replayed on device 0 in order to collect all events/metrics.
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (0 of 36)...
+==615== Replaying kernel "decompress_n(char*, long*, short*, int*, long*, int)" (done)
+numBlocks = 2048
+numBytesBeforeCompress = 1048576
+numElements = 131072
+numBytesAfterCompress = 131072
+Sizeofuint16 = 2
+==615== Generated result file: /build/analysis_D4.nvprof
+✱ The build folder has been uploaded to http://s3.amazonaws.com/files.rai-project.com/userdata/build-189854ae-63f8-4317-9a19-b24f4e1550cd.tar.gz. The data will be present for only a short duration of time.
+✱ Server has ended your request.
+wirelessprv-10-193-110-221:DLC namg$
