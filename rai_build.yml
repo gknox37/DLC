@@ -16,8 +16,10 @@ commands:
     # Use CMake to generate the build files. Remember that your directory gets uploaded to /src
     #- cmake /src
     # Run the make file to compile the project.
+
     - mv /src/src/main.cu /src/src/main_namit.cu
     - mv /src/src/compress_optimized.cu /src/src/main.cu
+    - ls /src/src/
     - make -C /src
     - ./ece508-final /src/data/input_10485760_uint8.raw
     #- g++ /src/schemes/longCompress.c -o longCompress
@@ -64,6 +66,16 @@ commands:
       nvprof --cpu-profiling on --export-profile analysis_D1.2.nvprof --analysis-metrics --
       ./ece508-final /src/data/input_10485760_uint8.raw
 
+    - rm src/src/main.cu
+    - mv /src/src/main_D4.cu /src/src/main.cu
+    - make -C /src
+    - ./ece508-final /src/data/input_10485760_uint8.raw
+    - >-
+      nvprof --cpu-profiling on --export-profile timeline_D4.nvprof --
+      ./ece508-final /src/data/input_10485760_uint8.raw
+    - >-
+      nvprof --cpu-profiling on --export-profile analysis_D4.nvprof --analysis-metrics --
+      ./ece508-final /src/data/input_10485760_uint8.raw
 
     #- >-
     #  ./ece508-final -i input1,input2 -o output
