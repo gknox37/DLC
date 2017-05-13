@@ -35,6 +35,8 @@ commands:
       nvprof --cpu-profiling on --export-profile analysis_D1.nvprof --analysis-metrics --
       ./ece508-final /src/data/input_10485760_uint8.raw
     - rm /src/src/main.cu
+    - rm ece508-final
+
     - mv /src/src/main_Lai.cu /src/src/main.cu
     - make -C /src
     - ./ece508-final /src/data/input_10485760_uint8.raw
@@ -46,6 +48,7 @@ commands:
       ./ece508-final /src/data/input_10485760_uint8.raw
 
     - rm /src/src/main.cu
+    - rm ece508-final
     - mv /src/src/main_namit.cu /src/src/main.cu
     - make -C /src
     - ./ece508-final /src/data/input_10485760_uint8.raw
@@ -55,7 +58,9 @@ commands:
     - >-
       nvprof --cpu-profiling on --export-profile analysis_D3.nvprof --analysis-metrics --
       ./ece508-final /src/data/input_10485760_uint8.raw
+
     - rm src/src/main.cu
+    - rm ece508-final
     - mv /src/src/compress_reduced.cu /src/src/main.cu
     - make -C /src
     - ./ece508-final /src/data/input_10485760_uint8.raw
@@ -67,6 +72,7 @@ commands:
       ./ece508-final /src/data/input_10485760_uint8.raw
 
     - rm src/src/main.cu
+    - rm ece508-final
     - mv /src/src/main_D4.cu /src/src/main.cu
     - make -C /src
     - ./ece508-final /src/data/input_10485760_uint8.raw
